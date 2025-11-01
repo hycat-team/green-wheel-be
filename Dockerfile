@@ -24,8 +24,6 @@ WORKDIR /app
 
 COPY --from=build /app/publish .
 
-# ASP.NET Core sẽ tự nhận appsettings.Development.json nếu ENV=Development
-
 
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
