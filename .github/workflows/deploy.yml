@@ -85,27 +85,42 @@ jobs:
               FRONTEND_PUBLIC_ORIGIN='${{ secrets.FRONTEND_PUBLIC_ORIGIN }}' \
               MSSQL_CONNECTION_STRING='Server=tcp:${{ secrets.AZURE_SQL_SERVER }},1433;Database=${{ secrets.AZURE_SQL_DB }};User Id=${{ secrets.AZURE_SQL_USER }};Password=${{ secrets.AZURE_SQL_PASSWORD }};TrustServerCertificate=True;' \
               REDIS_CONFIGURATION='${{ secrets.AZURE_REDIS_HOST }}:6380,password=${{ secrets.AZURE_REDIS_KEY }},ssl=True,abortConnect=False' \
+              REDIS_INSTANCE_NAME='${{ secrets.REDIS_INSTANCE_NAME }}' \
+              \
               JwtSettings__AccessTokenSecret='${{ secrets.JWT_ACCESS_TOKEN_SECRET }}' \
+              JwtSettings__AccessTokenExpiredTime='${{ secrets.JWT_ACCESS_TOKEN_EXPIRED_TIME }}' \
               JwtSettings__RefreshTokenSecret='${{ secrets.JWT_REFRESH_TOKEN_SECRET }}' \
+              JwtSettings__RefreshTokenExpiredTime='${{ secrets.JWT_REFRESH_TOKEN_EXPIRED_TIME }}' \
               JwtSettings__RegisterTokenSecret='${{ secrets.JWT_REGISTER_TOKEN_SECRET }}' \
+              JwtSettings__RegisterTokenExpiredTime='${{ secrets.JWT_REGISTER_TOKEN_EXPIRED_TIME }}' \
               JwtSettings__ForgotPasswordTokenSecret='${{ secrets.JWT_FORGOT_PASSWORD_TOKEN_SECRET }}' \
+              JwtSettings__ForgotPasswordTokenExpiredTime='${{ secrets.JWT_FORGOT_PASSWORD_TOKEN_EXPIRED_TIME }}' \
               JwtSettings__SetPasswordTokenSecret='${{ secrets.JWT_SET_PASSWORD_TOKEN_SECRET }}' \
+              JwtSettings__SetPasswordTokenExpiredTime='${{ secrets.JWT_SET_PASSWORD_TOKEN_EXPIRED_TIME }}' \
+              JwtSettings__Issuer='${{ secrets.JWT_ISSUER }}' \
+              JwtSettings__Audience='${{ secrets.JWT_AUDIENCE }}' \
+              \
               EmailSettings__SmtpServer='${{ secrets.EMAIL_SMTP_SERVER }}' \
               EmailSettings__Port='${{ secrets.EMAIL_PORT }}' \
               EmailSettings__SenderName='${{ secrets.EMAIL_SENDER_NAME }}' \
               EmailSettings__SenderEmail='${{ secrets.EMAIL_SENDER_EMAIL }}' \
               EmailSettings__Username='${{ secrets.EMAIL_USERNAME }}' \
               EmailSettings__Password='${{ secrets.EMAIL_PASSWORD }}' \
+              \
+              GoogleAuthSettings__ClientID='${{ secrets.GOOGLE_CLIENT_ID }}' \
+              GoogleAuthSettings__ClientSecret='${{ secrets.GOOGLE_CLIENT_SECRET }}' \
+              \
               CloudinarySettings__CloudName='${{ secrets.CLOUDINARY_CLOUD_NAME }}' \
               CloudinarySettings__ApiKey='${{ secrets.CLOUDINARY_API_KEY }}' \
               CloudinarySettings__ApiSecret='${{ secrets.CLOUDINARY_API_SECRET }}' \
-              GoogleAuthSettings__ClientID='${{ secrets.GOOGLE_CLIENT_ID }}' \
-              GoogleAuthSettings__ClientSecret='${{ secrets.GOOGLE_CLIENT_SECRET }}' \
+              CloudinarySettings__DefaultFolder='${{ secrets.CLOUDINARY_DEFAULT_FOLDER }}' \
+              \
               Gemini__ApiKey='${{ secrets.GEMINI_API_KEY }}' \
               Gemini__ModelName='${{ secrets.GEMINI_MODEL_NAME }}' \
               Gemini__ApiBaseUrl='${{ secrets.GEMINI_API_BASE_URL }}' \
               Gemini__MaxImageBytes='${{ secrets.GEMINI_MAX_IMAGE_BYTES }}' \
               Gemini__HttpTimeoutSeconds='${{ secrets.GEMINI_HTTP_TIMEOUT_SECONDS }}' \
+              \
               MomoSettings__PartnerCode='${{ secrets.MOMO_PARTNER_CODE }}' \
               MomoSettings__AccessKey='${{ secrets.MOMO_ACCESS_KEY }}' \
               MomoSettings__SecretKey='${{ secrets.MOMO_SECRET_KEY }}' \
@@ -114,7 +129,18 @@ jobs:
               MomoSettings__RequestType='${{ secrets.MOMO_REQUEST_TYPE }}' \
               MomoSettings__Lang='${{ secrets.MOMO_LANG }}' \
               MomoSettings__OrderExpireTime='${{ secrets.MOMO_ORDER_EXPIRE_TIME }}' \
-              MomoSettings__Ttl='${{ secrets.MOMO_TTL }}'
+              MomoSettings__Ttl='${{ secrets.MOMO_TTL }}' \
+              \
+              OTPSettings__OtpTtl='${{ secrets.OTP_TTL }}' \
+              OTPSettings__OtpRateLimit='${{ secrets.OTP_RATE_LIMIT }}' \
+              OTPSettings__OtpRateLimitTtl='${{ secrets.OTP_RATE_LIMIT_TTL }}' \
+              OTPSettings__OtpAttempts='${{ secrets.OTP_ATTEMPTS }}' \
+              OTPSettings__OtpAttemptsTtl='${{ secrets.OTP_ATTEMPTS_TTL }}' \
+              \
+              RateLimitSettings__TokenLimit='${{ secrets.TOKEN_LIMIT }}' \
+              RateLimitSettings__TokensPerPeriod='${{ secrets.TOKENS_PER_PERIOD }}' \
+              RateLimitSettings__ReplenishmentPeriod='${{ secrets.REPLENISHMENT_PERIOD }}' \
+              RateLimitSettings__QueueLimit='${{ secrets.QUEUE_LIMIT }}'
 
       - name: Show app URL
         run: |
