@@ -23,7 +23,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Quartz;
 
-
 namespace API
 {
     public class Program
@@ -31,15 +30,14 @@ namespace API
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Configuration.AddEnvironmentVariables();
             if (builder.Environment.IsDevelopment())
             {
                 Env.Load("../.env");
                 builder.Configuration.AddJsonFile("appsettings.json", optional: true);
                 builder.Configuration.AddJsonFile($"appsettings.Development.json", optional: true);
             }
+            builder.Configuration.AddEnvironmentVariables();
 
-            
             // Frontend Url
             var frontendOrigin = Environment.GetEnvironmentVariable("FRONTEND_ORIGIN")
                 ?? "http://localhost:3000";
@@ -66,7 +64,7 @@ namespace API
 
                 c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
-                    Description = @"JWT Authorization header sử dụng scheme Bearer. 
+                    Description = @"JWT Authorization header sử dụng scheme Bearer.
                         Nhập vào chuỗi như sau: 'Bearer <token>'.",
                     Name = "Authorization",
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
@@ -202,6 +200,7 @@ namespace API
             //Otp
             builder.Services.Configure<OTPSettings>(builder.Configuration.GetSection("OTPSettings"));
             //Google
+            var trmp = builder.Configuration.GetSection("GoogleAuthSettings");
             builder.Services.Configure<GoogleAuthSettings>(builder.Configuration.GetSection("GoogleAuthSettings"));
             //Gemini
             builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("Gemini"));
@@ -244,7 +243,7 @@ namespace API
                 q.AddTrigger(opts => opts
                     .ForJob("ExpiredRentalContracCleanupJob")
                     .WithIdentity("ExpiredRentalContracCleanupJob-Daily")
-                    .WithCronSchedule("0 0 0 * * ?")); 
+                    .WithCronSchedule("0 0 0 * * ?"));
             });
 
             // chạy background quartz
@@ -321,8 +320,8 @@ namespace API
             }
             app.UseMiddleware<GlobalErrorHandlerMiddleware>();
             // app.UseMiddleware<RateLimitMiddleware>();
-            if (builder.Environment.IsDevelopment())
-                app.UseHttpsRedirection();
+            //if (builder.Environment.IsDevelopment())
+            //    app.UseHttpsRedirection();
 
             app.UseCors("AllowFrontend");
 
