@@ -31,6 +31,20 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Retrieves all vehicle segments available in the system.
+        /// </summary>
+        /// <param name="id">Segment id</param>
+        /// <returns>List of vehicle segments.</returns>
+        /// <response code="200">Success.</response>
+        /// <response code="404">No vehicle segments found.</response>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var vehicleSegment = await _vehicleSegmentSerivce.GetByIdAsync(id);
+            return Ok(vehicleSegment);
+        }
+
+        /// <summary>
         /// Create vehicle segment.
         /// </summary>
         /// <param name="req">Create segment request object.</param>

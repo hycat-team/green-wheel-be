@@ -45,6 +45,13 @@ namespace Application
             return _mapper.Map<IEnumerable<VehicleSegmentViewRes>>(vehicleSegments) ?? [];
         }
 
+        public async Task<VehicleSegmentViewRes> GetByIdAsync(Guid id)
+        {
+            var segment = await _vehicleSegmentRepository.GetByIdAsync(id)
+                ?? throw new NotFoundException(Message.VehicleSegmentMessage.NotFound);
+            return _mapper.Map<VehicleSegmentViewRes>(segment);
+        }
+
         public async Task UpdateAsync(Guid id, UpdateSegmentReq req)
         {
             var segment = await  _vehicleSegmentRepository.GetByIdAsync(id)
