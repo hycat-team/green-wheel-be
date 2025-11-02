@@ -234,20 +234,14 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Retrieves detailed information of a specific vehicle model img and its unique identifier,
-        /// including availability data for a given station and rental period.
+        /// Get All main image.
         /// </summary>
-        /// <returns>Detailed vehicle model img information with availability data.</returns>
         /// <response code="200">Success.</response>
-        /// <response code="404">Vehicle model not found.</response>
-
-        [HttpGet("img")]
-        [RoleAuthorize([RoleName.Admin, RoleName.Staff])]
-        public async Task<IActionResult> GetAllVehicelModelImg()
+        [HttpGet("main-images")]
+        public async Task<IActionResult> GetAllModelMainImage()
         {
-            var res = await _modelImageService.GetAllVehicleModelMainImagesAsync();
+            var res = await _vehicleModelService.GetAllModelMainImage();
             return Ok(res);
         }
-
     }
 }

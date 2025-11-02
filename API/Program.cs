@@ -1,25 +1,27 @@
-﻿using API.Extentions;
+﻿using API.BackgroundJob;
+using API.Extentions;
 using API.Filters;
 using API.Middleware;
+using API.Middlewares;
 using Application;
 using Application.Abstractions;
 using Application.AppSettingConfigurations;
+using Application.Constants;
 using Application.Mappers;
 using Application.Repositories;
 using Application.UnitOfWorks;
 using Application.Validators.User;
+using AutoMapper;
 using CloudinaryDotNet;
 using DotNetEnv;
 using FluentValidation;
+using Infrastructure.ExternalService;
 using Infrastructure.Interceptor;
 using Infrastructure.Repositories;
 using Infrastructure.UnitOfWorks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using AutoMapper;
-using Infrastructure.ExternalService;
-using API.Middlewares;
-using Application.Constants;
+using Quartz;
 
 namespace API
 {
@@ -28,15 +30,19 @@ namespace API
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            if (builder.Environment.IsDevelopment())
+            {
+                Env.Load("../.env");
+                builder.Configuration.AddJsonFile("appsettings.json", optional: true);
+                builder.Configuration.AddJsonFile($"appsettings.Development.json", optional: true);
+            }
+            builder.Configuration.AddEnvironmentVariables();
 
-            Env.Load("../.env");
-            builder.Configuration
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-            .AddEnvironmentVariables();
             // Frontend Url
             var frontendOrigin = Environment.GetEnvironmentVariable("FRONTEND_ORIGIN")
                 ?? "http://localhost:3000";
+            var frontendPublicOrigin = Environment.GetEnvironmentVariable("FRONTEND_PUBLIC_ORIGIN")
+                ?? frontendOrigin;
 
             // Add services to the container.
             // Add services to the container.
@@ -58,7 +64,7 @@ namespace API
 
                 c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
-                    Description = @"JWT Authorization header sử dụng scheme Bearer. 
+                    Description = @"JWT Authorization header sử dụng scheme Bearer.
                         Nhập vào chuỗi như sau: 'Bearer <token>'.",
                     Name = "Authorization",
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
@@ -86,17 +92,15 @@ namespace API
                 });
             });
 
-            //Cors frontEnd
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowFrontend",
-                    policy =>
-                    {
-                        policy.WithOrigins(frontendOrigin) // FE origin
-                              .AllowAnyHeader()
-                              .AllowAnyMethod()
-                              .AllowCredentials(); // nếu bạn gửi cookie (refresh_token)
-                    });
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins(frontendOrigin, frontendPublicOrigin)
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
             });
             // Kết nối DB
             var connectionString = builder.Configuration["MSSQL_CONNECTION_STRING"];
@@ -106,7 +110,8 @@ namespace API
             builder.Services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = builder.Configuration["REDIS_CONFIGURATION"];
-                options.InstanceName = builder.Configuration["Redis:InstanceName"];
+                options.InstanceName = builder.Configuration["REDIS_INSTANCE_NAME"]
+                                       ?? "GreenWheel:"; // fallback
             });
 
             //thêm httpcontextAccessor để lấy context trong service
@@ -196,6 +201,7 @@ namespace API
             //Otp
             builder.Services.Configure<OTPSettings>(builder.Configuration.GetSection("OTPSettings"));
             //Google
+            var trmp = builder.Configuration.GetSection("GoogleAuthSettings");
             builder.Services.Configure<GoogleAuthSettings>(builder.Configuration.GetSection("GoogleAuthSettings"));
             //Gemini
             builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("Gemini"));
@@ -205,6 +211,47 @@ namespace API
             builder.Services.AddScoped<GlobalErrorHandlerMiddleware>();
             //sử dụng cache
             builder.Services.AddMemoryCache();
+            //background job
+            builder.Services.AddQuartz(q =>
+            {
+                // JOB 1: LateReturnWarningJob
+                q.AddJob<LateReturnWarningJob>(opts =>
+                    opts.WithIdentity("LateReturnWarningJob"));
+
+                // Trigger chạy ngay
+                q.AddTrigger(opts => opts
+                    .ForJob("LateReturnWarningJob")
+                    .WithIdentity("LateReturnWarningJob-Immediate")
+                    .StartNow());
+
+                // Trigger chạy 00:00 mỗi ngày
+                q.AddTrigger(opts => opts
+                    .ForJob("LateReturnWarningJob")
+                    .WithIdentity("LateReturnWarningJob-Daily")
+                    .WithCronSchedule("0 0 0 * * ?"));
+
+                // JOB 2: ExpiredContractCleanupJob
+                q.AddJob<ExpiredRentalContracCleanupJob>(opts =>
+                    opts.WithIdentity("ExpiredRentalContracCleanupJob"));
+
+                // Trigger chạy ngay
+                q.AddTrigger(opts => opts
+                    .ForJob("ExpiredRentalContracCleanupJob")
+                    .WithIdentity("ExpiredRentalContracCleanupJob-Immediate")
+                    .StartNow());
+
+                // Trigger chạy 00:00 mỗi ngày
+                q.AddTrigger(opts => opts
+                    .ForJob("ExpiredRentalContracCleanupJob")
+                    .WithIdentity("ExpiredRentalContracCleanupJob-Daily")
+                    .WithCronSchedule("0 0 0 * * ?"));
+            });
+
+            // chạy background quartz
+            builder.Services.AddQuartzHostedService(opt =>
+            {
+                opt.WaitForJobsToComplete = true;
+            });
 
             //thêm filter cho validation
             builder.Services.AddControllers(options =>
@@ -246,8 +293,7 @@ namespace API
             builder.Services.AddSingleton(cloudinary);
 
             var app = builder.Build();
-            //accept frontend
-            app.UseCors("AllowFrontend");
+
             //run cache and add list roll to cache
             using (var scope = app.Services.CreateScope())
             {
@@ -275,7 +321,10 @@ namespace API
             }
             app.UseMiddleware<GlobalErrorHandlerMiddleware>();
             // app.UseMiddleware<RateLimitMiddleware>();
-            //app.UseHttpsRedirection();
+            //if (builder.Environment.IsDevelopment())
+            //    app.UseHttpsRedirection();
+
+            app.UseCors("AllowFrontend");
 
             app.UseAuthentication();
             app.UseAuthorization();

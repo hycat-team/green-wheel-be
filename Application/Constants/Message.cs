@@ -85,11 +85,6 @@ namespace Application.Constants
 
             // Bank info
 
-            public const string BankNameIsRequired = "user.bank_name_require";
-            public const string BankAccountNumberIsRequired = "user.bank_account_number_require";
-            public const string InvalidBankAccountNumber = "user.invalid_bank_account_number";
-            public const string BankAccountNameIsRequired = "user.bank_account_name_require";
-
             public const string FullNameIsRequired = "user.full_name_require";
         }
 
@@ -309,6 +304,8 @@ namespace Application.Constants
             public static string DamageFeeIsRequired = "vehicle_component.damage_fee_required";
 
             public static string DamageFeeMustBePositive = "vehicle_component.damage_fee_must_be_non_negative";
+
+            public static string InvalidComponentIds = "vehicle_component.invalid_component_ids";
         }
 
         public static class VehicleChecklistMessage
@@ -348,13 +345,13 @@ namespace Application.Constants
             public const string FoundedYearIsRequired = "brand.founded_year_require";
             public const string CountryIsRequired = "brand.Country_require";
             public const string NotFound = "brand.not_found";
-
-            public static class BusinessVariable
-            {
-                public const string NotFound = "business_variable.not_found";
-                public const string ValueIsRequired = "business_variable.value_is_required";
-                public const string ValueMustBeGreaterThanZero = "business_variable.value_must_be_greater_than_zero";
-            }
+        }
+      
+        public static class BusinessVariable
+        {
+            public const string NotFound = "business_variable.not_found";
+            public const string ValueIsRequired = "business_variable.value_is_required";
+            public const string ValueMustBeGreaterThanZero = "business_variable.value_must_be_greater_than_zero";
         }
     }
 }

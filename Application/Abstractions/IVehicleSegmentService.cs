@@ -9,5 +9,6 @@ namespace Application.Abstractions
         Task<Guid> CreateAsync(CreateSegmentReq req);
         Task UpdateAsync(Guid id, UpdateSegmentReq req);
         Task DeleteAsync(Guid id);
+        Task<VehicleSegmentViewRes> GetByIdAsync(Guid id);
     }
 }
