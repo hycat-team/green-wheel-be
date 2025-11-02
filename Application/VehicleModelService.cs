@@ -39,7 +39,7 @@ namespace Application
             await _vehicleModelUow.BeginTransactionAsync();
             try
             {
-                if((await _vehicleSegmentRepository.GetByIdAsync(req.SegmentId) == null))
+                if ((await _vehicleSegmentRepository.GetByIdAsync(req.SegmentId) == null))
                 {
                     throw new NotFoundException(Message.VehicleSegmentMessage.NotFound);
                 }
@@ -51,7 +51,7 @@ namespace Application
                 var vehicleModel = _mapper.Map<VehicleModel>(req);
                 vehicleModel.Id = id;
                 await _vehicleModelRepository.AddAsync(vehicleModel);
-                if(!(await _vehicleModelUow.VehicleComponentRepository.VerifyComponentsAsync(req.ComponentIds)))
+                if (!(await _vehicleModelUow.VehicleComponentRepository.VerifyComponentsAsync(req.ComponentIds)))
                 {
                     throw new BadRequestException(Message.VehicleComponentMessage.InvalidComponentIds);
                 }
@@ -71,7 +71,6 @@ namespace Application
                 await _vehicleModelUow.RollbackAsync();
                 throw;
             }
-           
         }
 
         public async Task<bool> DeleteVehicleModleAsync(Guid id)
@@ -82,7 +81,7 @@ namespace Application
         public async Task<IEnumerable<VehicleModelViewRes>> SearchVehicleModel(VehicleFilterReq vehicleFilterReq)
         {
             var vehicleModels = await _vehicleModelRepository.FilterVehicleModelsAsync(vehicleFilterReq.StationId, vehicleFilterReq.StartDate, vehicleFilterReq.EndDate, vehicleFilterReq.SegmentId);
-            return _mapper.Map<IEnumerable<VehicleModelViewRes>>(vehicleModels)  ?? [];
+            return _mapper.Map<IEnumerable<VehicleModelViewRes>>(vehicleModels) ?? [];
         }
 
         public async Task<VehicleModelViewRes> GetByIdAsync(Guid id, Guid stationId, DateTimeOffset startDate, DateTimeOffset endDate)
@@ -97,10 +96,13 @@ namespace Application
             var models = await _uow.VehicleModels.GetAllAsync(name, segmentId);
             return _mapper.Map<IEnumerable<VehicleModelViewRes>>(models) ?? [];
         }
+
         public async Task<int> UpdateVehicleModelAsync(Guid Id, UpdateVehicleModelReq req)
         {
-            var model = await _vehicleModelRepository.GetByIdAsync(Id) ?? throw new NotFoundException(Message.VehicleModelMessage.NotFound);
-            if(req.SegmentId != null && (await _vehicleSegmentRepository.GetByIdAsync((Guid)req.SegmentId) == null))
+            var model = await _vehicleModelRepository.GetByIdAsync(Id)
+                ?? throw new NotFoundException(Message.VehicleModelMessage.NotFound);
+
+            if (req.SegmentId != null && (await _vehicleSegmentRepository.GetByIdAsync((Guid)req.SegmentId) == null))
             {
                 throw new NotFoundException(Message.VehicleSegmentMessage.NotFound);
             }

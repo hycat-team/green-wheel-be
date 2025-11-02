@@ -15,7 +15,10 @@ namespace Application.Validators.VehicelChecklistItem
                 .GreaterThan(0).WithMessage(Message.VehicleModelMessage.CostDayIdsRequired);
 
             RuleFor(x => x.DepositFee)
-                .GreaterThanOrEqualTo(0).WithMessage(Message.VehicleModelMessage.CostIdsRequired);
+                .GreaterThanOrEqualTo(0).WithMessage(Message.VehicleModelMessage.DepositFeeIsRequired);
+
+            RuleFor(x => x.ReservationFee)
+                .GreaterThanOrEqualTo(0).WithMessage(Message.VehicleModelMessage.ReservationFeeIsRequired);
 
             RuleFor(x => x.SeatingCapacity)
                 .GreaterThan(0).WithMessage(Message.VehicleModelMessage.SeatingCapacityIsRequired);

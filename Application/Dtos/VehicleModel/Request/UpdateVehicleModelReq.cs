@@ -10,11 +10,13 @@ namespace Application.Dtos.VehicleModel.Request
     {
         public string? Name { get; set; }
 
-        public string? Description { get; set; } 
+        public string? Description { get; set; }
 
         public decimal? CostPerDay { get; set; }
 
         public decimal? DepositFee { get; set; }
+
+        public decimal? ReservationFee { get; set; }
 
         public int? SeatingCapacity { get; set; }
 
