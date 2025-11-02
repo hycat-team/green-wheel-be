@@ -145,5 +145,5 @@ jobs:
       - name: Show app URL
         run: |
           FQDN=$(az containerapp show -g $RG -n $APP_NAME --query properties.configuration.ingress.fqdn -o tsv)
-          echo "✅ Deployed successfully!"
-          echo "🌎 URL: https://$FQDN"
+          echo "Deployed successfully!"
+          echo "URL: https://$FQDN"
