@@ -12,6 +12,8 @@ namespace Application.Dtos.VehicleModel.Request
 
         public decimal DepositFee { get; set; }
 
+        public decimal ReservationFee { get; set; }
+
         public int SeatingCapacity { get; set; }
 
         public int NumberOfAirbags { get; set; }

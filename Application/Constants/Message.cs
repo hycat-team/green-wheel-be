@@ -72,6 +72,9 @@ namespace Application.Constants
             public const string InvalidCitizenIdData = "user.invalid_citizen_identity_data";
             public const string CitizenIdentityDuplicate = "user.citizen_identity_duplicate";
             public const string InvalidCitizenIdentityImagesAmount = "user.invalid_citizen_identity_images_amount";
+            public const string InvalidCitizenIdDocumentType = "user.invalid_citizen_id_document_type";
+            
+
 
             //Driver License
 
@@ -79,6 +82,7 @@ namespace Application.Constants
             public const string DriverLicenseNotFound = "user.driver_license_not_found";
             public const string DriverLicenseDuplicate = "user.driver_license_duplicate";
             public const string InvalidDriverLicenseImagesAmount = "user.invalid_driver_license_images_amount";
+            public const string InvalidDriverLicenseDocumentType = "user.invalid_driver_license_document_type";
 
             // Staff
             public const string StationIdIsRequired = "user.station_id_require";
@@ -125,7 +129,8 @@ namespace Application.Constants
             public const string SegmentIdIsRequired = "vehicle_model.segment_id_require";
             public const string ImageIdsRequired = "vehicle_model.image_ids_required";
             public const string CostDayIdsRequired = "vehicle_model.cost_per_day_invalid";
-            public const string CostIdsRequired = "vehicle_model.deposit_fee_invalid";
+            public const string DepositFeeIsRequired = "vehicle_model.deposit_fee_invalid";
+            public const string ReservationFeeIsRequired = "vehicle_model.reservation_fee_invalid";
         }
 
         //change password
@@ -149,6 +154,7 @@ namespace Application.Constants
 
             // Validation khi tạo
             public const string ToStationMustDifferent = "dispatch.to_station_must_different";
+
             public const string ToStationRequied = "dispatch.to_station_require";
             public const string ModelRequied = "dispatch.model_require";
             public const string NumberOfVehicleShouldGreaterThanZero = "dispatch.number_vehicle_greater_than_zero";
@@ -160,6 +166,7 @@ namespace Application.Constants
 
             // Flow cập nhật trạng thái
             public const string OnlyPendingCanApproveReject = "dispatch.only_pending_can_approve_reject";
+
             public const string OnlyApprovedCanReceive = "dispatch.only_approved_can_receive";
             public const string OnlyPendingCanCancel = "dispatch.only_pending_can_cancel";
             public const string OnlyApproveCanConfirm = "dispatch.only_approved_can_confirm";
@@ -172,6 +179,7 @@ namespace Application.Constants
 
             // Input
             public const string InvalidStatus = "dispatch.invalid_status";
+
             public const string IdNull = "dispatch.id_null";
 
             public static string FromStationIsRequire = "dispatch.from_station_is_required";
@@ -346,7 +354,7 @@ namespace Application.Constants
             public const string CountryIsRequired = "brand.Country_require";
             public const string NotFound = "brand.not_found";
         }
-      
+
         public static class BusinessVariable
         {
             public const string NotFound = "business_variable.not_found";
