@@ -30,5 +30,13 @@ namespace Application.Helpers
             if (exiting.UserId == userId) return;
             if (exiting.DeletedAt == null) throw new ConflictDuplicateException(Message.UserMessage.DriverLicenseDuplicate);
         }
+
+        public static int CalculateAge(DateTimeOffset dateOfBirth)
+        {
+            var today = DateTimeOffset.UtcNow;
+            var age = today.Year - dateOfBirth.Year;
+            if (today < dateOfBirth.AddYears(age)) age--;
+            return age;
+        }
     }
 }

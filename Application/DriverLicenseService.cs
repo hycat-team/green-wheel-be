@@ -79,12 +79,14 @@ namespace Application
             if (dto == null)
                 throw new BusinessException(Message.UserMessage.InvalidDriverLicenseData);
 
-            // parse ngày
             DateTimeOffset.TryParse(dto.DateOfBirth, out var dob);
             DateTimeOffset.TryParse(dto.ExpiresAt, out var exp);
+
+            if (dob == default || VerifyUniqueNumberAsync.CalculateAge(dob) < 21)
+                throw new BadRequestException(Message.UserMessage.InvalidUserAge);
             await VerifyUniqueNumberAsync.VerifyUniqueDriverLicenseNumberAsync(dto.Number ?? string.Empty, userId,
                 _licenseRepo);
-            // parse sex + class thành int
+
             var sex = ParseSex(dto.Sex);
             var licenseClass = ParseLicenseClass(dto.Class);
 

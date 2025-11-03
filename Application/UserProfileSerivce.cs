@@ -301,7 +301,14 @@ namespace Application
             if (!string.IsNullOrWhiteSpace(req.Number)) entity.Number = req.Number.Trim();
             if (!string.IsNullOrWhiteSpace(req.FullName)) entity.FullName = req.FullName.Trim();
             if (!string.IsNullOrWhiteSpace(req.Nationality)) entity.Nationality = req.Nationality.Trim();
-            if (req.DateOfBirth.HasValue) entity.DateOfBirth = req.DateOfBirth.Value;
+            if (req.DateOfBirth.HasValue)
+            {
+                var age = VerifyUniqueNumberAsync.CalculateAge(req.DateOfBirth.Value);
+                if (age < 21)
+                    throw new BadRequestException(Message.UserMessage.InvalidUserAge);
+
+                entity.DateOfBirth = req.DateOfBirth.Value;
+            }
             if (req.ExpiresAt.HasValue) entity.ExpiresAt = req.ExpiresAt.Value;
 
             entity.UpdatedAt = DateTimeOffset.UtcNow;
@@ -331,7 +338,14 @@ namespace Application
             if (!string.IsNullOrWhiteSpace(req.FullName)) entity.FullName = req.FullName.Trim();
             if (!string.IsNullOrWhiteSpace(req.Nationality)) entity.Nationality = req.Nationality.Trim();
             if (req.Sex.HasValue) entity.Sex = req.Sex.Value;
-            if (req.DateOfBirth.HasValue) entity.DateOfBirth = req.DateOfBirth.Value;
+            if (req.DateOfBirth.HasValue)
+            {
+                var age = VerifyUniqueNumberAsync.CalculateAge(req.DateOfBirth.Value);
+                if (age < 21)
+                    throw new BadRequestException(Message.UserMessage.InvalidUserAge);
+
+                entity.DateOfBirth = req.DateOfBirth.Value;
+            }
             if (req.ExpiresAt.HasValue) entity.ExpiresAt = req.ExpiresAt.Value;
 
             entity.UpdatedAt = DateTimeOffset.UtcNow;
