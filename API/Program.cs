@@ -228,7 +228,7 @@ namespace API
                 q.AddTrigger(opts => opts
                     .ForJob("LateReturnWarningJob")
                     .WithIdentity("LateReturnWarningJob-Daily")
-                    .WithCronSchedule("0 0 0 * * ?"));
+                    .WithCronSchedule("0 0 10 * * ?"));
 
                 // JOB 2: ExpiredContractCleanupJob
                 q.AddJob<ExpiredRentalContracCleanupJob>(opts =>
@@ -244,7 +244,7 @@ namespace API
                 q.AddTrigger(opts => opts
                     .ForJob("ExpiredRentalContracCleanupJob")
                     .WithIdentity("ExpiredRentalContracCleanupJob-Daily")
-                    .WithCronSchedule("0 0 0 * * ?"));
+                    .WithCronSchedule("0 0 10 * * ?"));
             });
 
             // chạy background quartz
