@@ -4,6 +4,7 @@ using Application.Constants;
 using Application.Helpers;
 using Application.Repositories;
 using Domain.Entities;
+using Microsoft.Extensions.Configuration.UserSecrets;
 
 namespace Application
 {
@@ -56,6 +57,8 @@ namespace Application
 
             DateTimeOffset.TryParse(dto.DateOfBirth, out var dob);
             DateTimeOffset.TryParse(dto.ExpiresAt, out var exp);
+            if (dob == default || VerifyUniqueNumberAsync.CalculateAge(dob) < 21)
+                throw new BadRequestException(Message.UserMessage.InvalidUserAge);
             await VerifyUniqueNumberAsync.VerifyUniqueIdentityNumberAsync(dto.IdNumber ?? string.Empty, userId, _citizenRepo);
             var entity = new CitizenIdentity
             {
@@ -72,7 +75,6 @@ namespace Application
                 BackImagePublicId=backPublicId,
                 UpdatedAt = DateTimeOffset.UtcNow
             };
-
             var existing = await _citizenRepo.GetByUserIdAsync(userId);
             if (existing != null)
             {
