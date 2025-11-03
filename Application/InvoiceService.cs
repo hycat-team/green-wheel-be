@@ -61,6 +61,18 @@ namespace Application
                 await CancleReservationInvoice(invoice);
                 contract.Status = (int)RentalContractStatus.Active;
                 await _uow.RentalContractRepository.UpdateAsync(contract);
+                var subject = "[GreenWheel] Successfully Payment";
+                var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "PaymentSuccessTemplate.html");
+                var body = System.IO.File.ReadAllText(templatePath);
+                var customer = (await _uow.RentalContractRepository.GetByIdAsync(invoice.ContractId))!.Customer;
+                body = body
+                     .Replace("{CustomerName}", $"{customer.LastName} {customer.FirstName}")
+                     .Replace("{InvoiceCode}", invoice.Id.ToString())
+                     .Replace("{PaidAmount}", $"{invoice.PaidAmount?.ToString("N0")} VND")
+                     .Replace("{PaymentMethod}", Enum.GetName(typeof(PaymentMethod), invoice.PaymentMethod))
+                     .Replace("{InvoiceType}", Enum.GetName(typeof(InvoiceType), invoice.Type))
+                     .Replace("{PaidAt}", invoice.PaidAt?.ToString("dd/MM/yyyy HH:mm"));
+                await _emailService.SendEmailAsync(customer.Email!, subject, body);
                 var vehicle = await _uow.VehicleRepository.GetByIdAsync((Guid)contract.VehicleId!)
                             ?? throw new NotFoundException(Message.VehicleMessage.NotFound);
                 if (vehicle.Status == (int)VehicleStatus.Available)

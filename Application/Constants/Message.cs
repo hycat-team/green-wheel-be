@@ -123,8 +123,8 @@ namespace Application.Constants
             public const string BatteryCapacityCanNotNegative = "vehicle_model.battery_capacity_can_not_negative";
             public const string EcoRangeKmIsRequired = "vehicle_model.eco_range_km_require";
             public const string EcoRangeKmIsCanNotNegative = "vehicle_model.eco_range_km_can_not_negative";
-            public const string SportRangeKmIsRequired = "vehicle_model.sport_rang_km_require";
-            public const string SportRangeKmCanNotNegative = "vehicle_model.sport_rang_km_can_not_negative";
+            public const string SportRangeKmIsRequired = "vehicle_model.sport_range_km_require";
+            public const string SportRangeKmCanNotNegative = "vehicle_model.sport_range_km_can_not_negative";
             public const string BrandIdIsRequired = "vehicle_model.brand_id_require";
             public const string SegmentIdIsRequired = "vehicle_model.segment_id_require";
             public const string ImageIdsRequired = "vehicle_model.image_ids_required";

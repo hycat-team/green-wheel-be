@@ -328,31 +328,31 @@ DECLARE @customerRole UNIQUEIDENTIFIER =
  (SELECT id FROM roles WHERE name='Customer');
 
 INSERT INTO users (first_name,last_name,email,password,phone,sex,role_id) VALUES
-(N'Lê',N'Hoàng Duy','lehoangduy23092005@gmail.com',
+(N'Duy',N'Case 1 Main','lehoangduy23092005@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000001',0,@customerRole),
-(N'Lê',N'Hoàng Duy','lehoangduy23905@gmail.com',
+(N'Duy',N'Case 1 Sub','lehoangduy23905@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000002',0,@customerRole),
-(N'Lê',N'Hoàng Duy','lehoangduy20102005@gmail.com',
+(N'Duy',N'Case 2 Main','lehoangduy20102005@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000003',0,@customerRole),
-(N'Hoàng',N'Duy Lê','hoangduyle.work@gmail.com',
+(N'Duy',N'Case 2 Sub','hoangduyle.work@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000004',0,@customerRole),
-(N'Huỳnh',N'Ng SE183274','huyngse183274@fpt.edu.vn',
+(N'Huy',N'Case 3 Main','huyngse183274@fpt.edu.vn',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000005',0,@customerRole),
-(N'Ngô',N'Gia Huy','ngogiahuy.work@gmail.com',
+(N'Huy',N'Case 3 Sub','ngogiahuy.work@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000006',0,@customerRole),
-(N'Dức',N'K05','duck05gaming@gmai.com',
+(N'Đức',N'Case 4 Main','duck05gaming@gmai.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000007',0,@customerRole),
-(N'Dức',N'Test','duck.test.dev.05@gmail.com',
+(N'Đức',N'Case 4 Sub','duck.test.dev.05@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000008',0,@customerRole),
-(N'Huy',N'Cùng Bão Bình','Huycungbaobinh@gmail.com',
+(N'Huy',N'Cleaning','Huycungbaobinh@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000009',0,@customerRole),
-(N'Nguyễn',N'Quang Huy','Nguyenquanghuy14022005@gmail.com',
+(N'Huy',N'Warning','Nguyenquanghuy14022005@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000010',0,@customerRole),
-(N'Quang',N'Huy','Quanghuynguyen14022005@gmail.com',
+(N'Huy',N'Free 1','Quanghuynguyen14022005@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000011',0,@customerRole),
-(N'Huy',N'Quang','Huyquangnguyen14022005@gmail.com',
+(N'Huy',N'Free 2','Huyquangnguyen14022005@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000012',0,@customerRole),
-(N'Huy',N'Tradecoin','Huytradecoin@gmail.com',
+(N'Huy',N'Free 3','Huytradecoin@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000013',0,@customerRole);
 
 
@@ -677,7 +677,7 @@ INSERT INTO rental_contracts
  vehicle_id,customer_id,handover_staff_id,station_id)
 VALUES
 (@cE,'Active VF7A U9',
- '2025-10-29T00:00:00+07:00','2025-11-04T09:00:00+07:00',
+ '2025-10-29T00:00:00+07:00','2025-11-03T09:00:00+07:00',
  2,1,1,@vVF7A,@u9,@staff,@sA);
 
 EXEC dbo.__seed_create_invoices @cE,1,1;
@@ -692,7 +692,7 @@ INSERT INTO rental_contracts
  vehicle_id,customer_id,handover_staff_id,station_id,actual_start_date)
 VALUES
 (@cF,'Active VF7B U10',
- '2025-10-29T00:00:00+07:00','2025-11-04T09:00:00+07:00',
+ '2025-10-29T00:00:00+07:00','2025-11-03T09:00:00+07:00',
  2,1,1,@vVF7B,@u10,@staff,@sA,'2025-10-29T00:00:00+07:00');
 
 EXEC dbo.__seed_create_invoices @cF,1,1;
