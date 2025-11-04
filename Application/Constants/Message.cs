@@ -1,5 +1,6 @@
 ﻿using Application.Dtos.BusinessVariable.Request;
 using Application.Dtos.VehicleChecklist.Request;
+using Application.Dtos.VehicleChecklistItem.Request;
 using Application.Dtos.VehicleSegment.Request;
 
 namespace Application.Constants
@@ -326,6 +327,8 @@ namespace Application.Constants
             public static string AtLeastOnePartyMustSign = "vehicle_checklist.at_least_one_party_must_sign";
 
             public static string InvalidType = "vehicle_checklist.invalid_type";
+
+            public static string InvalidStatus = "vehicle_checklist.invalid_status";
         }
 
         public static class VehicleChecklistItemMessage

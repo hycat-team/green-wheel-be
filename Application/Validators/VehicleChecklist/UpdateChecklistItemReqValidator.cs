@@ -19,7 +19,7 @@ namespace Application.Validators.VehicleChecklist
 
             RuleFor(x => x.Status)
                 .InclusiveBetween(0, 4)
-                .WithMessage(Message.CloudinaryMessage.InvalidFileType);
+                .WithMessage(Message.VehicleChecklistMessage.InvalidStatus);
         }
     }
 }
