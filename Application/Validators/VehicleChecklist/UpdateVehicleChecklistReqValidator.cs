@@ -17,7 +17,8 @@ namespace Application.Validators.VehicleChecklist
                 .NotEmpty().WithMessage(Message.VehicleChecklistMessage.NotFound);
 
             RuleForEach(x => x.ChecklistItems)
-                .SetValidator(new UpdateChecklistItemReqValidator());
+                .SetValidator(new UpdateChecklistItemReqValidator())
+                .When(x => x.ChecklistItems != null && x.ChecklistItems.Any());
         }
     }
 }
