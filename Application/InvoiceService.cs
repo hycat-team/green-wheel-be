@@ -508,8 +508,7 @@ namespace Application
                 return;
             }
             var subject = "[GreenWheel] Important Notice: Penalty Must Be Paid Within 10 Days";
-            var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "PayPenatyWarningEmailTemplate.html");
-            var body = System.IO.File.ReadAllText(templatePath);
+            
             await _uow.BeginTransactionAsync();
             try
             {
@@ -517,7 +516,8 @@ namespace Application
                 {
                     var customer = invoice.Contract.Customer;
                     var station = invoice.Contract.Station;
-
+                    var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "PayPenatyWarningEmailTemplate.html");
+                    var body = System.IO.File.ReadAllText(templatePath);
                     body = body.Replace("{CustomerName}", $"{customer.LastName} {customer.FirstName}")
                            .Replace("{BookingId}", invoice.Contract.Id.ToString())
                            .Replace("{StationName}", invoice.Contract.Station.Name);

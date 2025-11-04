@@ -765,8 +765,6 @@ namespace Application
                 return;
             }
             var subject = "[GreenWheel] Vehicle Return Overdue Notice – Immediate Attention Required";
-            var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "LateReturnEmailTemplate.html");
-            var body = System.IO.File.ReadAllText(templatePath);
             await _uow.BeginTransactionAsync();
             try
             {
@@ -776,7 +774,8 @@ namespace Application
                     var model = contract.Vehicle!.Model;
                     var vehicle = contract.Vehicle;
                     var station = contract.Station;
-
+                    var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "LateReturnEmailTemplate.html");
+                    var body = System.IO.File.ReadAllText(templatePath);
                     body = body.Replace("{CustomerName}", $"{customer.LastName} {customer.FirstName}")
                            .Replace("{BookingId}", contract.Id.ToString())
                            .Replace("{VehicleModelName}", model.Name)
@@ -808,8 +807,6 @@ namespace Application
                 return;
             }
             var subject = "[GreenWheel] Rental Contract Cancelled – Pickup Deadline Missed";
-            var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "CancelExpiredContractEmailTemplate.html");
-            var body = System.IO.File.ReadAllText(templatePath);
             await _uow.BeginTransactionAsync();
             try
             {
@@ -819,7 +816,8 @@ namespace Application
                     var model = contract.Vehicle!.Model;
                     var vehicle = contract.Vehicle;
                     var station = contract.Station;
-
+                    var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "CancelExpiredContractEmailTemplate.html");
+                    var body = System.IO.File.ReadAllText(templatePath);
                     body = body.Replace("{CustomerName}", $"{customer.LastName} {customer.FirstName}")
                                     .Replace("{BookingId}", contract.Id.ToString())
                                     .Replace("{VehicleModelName}", model.Name)
