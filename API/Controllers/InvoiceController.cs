@@ -6,6 +6,7 @@ using Application.Dtos.Common.Request;
 using Application.Dtos.Invoice.Request;
 using Application.Dtos.Momo.Request;
 using Application.Dtos.Payment.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using System.IdentityModel.Tokens.Jwt;
@@ -35,7 +36,7 @@ namespace API.Controllers
         /// <response code="200">Success.</response>
         /// <response code="400">Invalid signature.</response>
         /// <response code="404">Invoice not found.</response>
-
+        [AllowAnonymous]
         [HttpPost("payment-callback/momo")]
         public async Task<IActionResult> UpdateInvoiceMomoPayment([FromBody] MomoIpnReq req)
         {
