@@ -464,5 +464,41 @@ namespace Application
         {
             await _photoService.DeletePhotoAsync(modelId.ToString());
         }
+
+        public async Task WarningRefundInvoiceAsync()
+        {
+            var targetInvoice = await _uow.InvoiceRepository.GetRefundInvoiceWarningAsync();
+            if (targetInvoice == null || !targetInvoice.Any())
+            {
+                return;
+            }
+            var subject = "[GreenWheel] Important Notice: Penalty Must Be Paid Within 10 Days";
+            
+            await _uow.BeginTransactionAsync();
+            try
+            {
+                foreach (var invoice in targetInvoice)
+                {
+                    var customer = invoice.Contract.Customer;
+                    var station = invoice.Contract.Station;
+                    var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "PayPenatyWarningEmailTemplate.html");
+                    var body = System.IO.File.ReadAllText(templatePath);
+                    body = body.Replace("{CustomerName}", $"{customer.LastName} {customer.FirstName}")
+                           .Replace("{BookingId}", invoice.Contract.Id.ToString())
+                           .Replace("{StationName}", invoice.Contract.Station.Name);
+                    if(customer.Email != null)
+                    {
+                        await _emailService.SendEmailAsync(customer.Email!, subject, body);
+                    }
+                }
+                await _uow.SaveChangesAsync();
+                await _uow.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await _uow.RollbackAsync();
+                throw;
+            }
+        }
     }
 }
