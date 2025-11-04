@@ -438,8 +438,9 @@ GO
 
 
 /* ============================================================
-   SECTION 17 — COMPLETED CONTRACTS FOR JAN–NOV 2025 (FIXED)
+   SECTION 17 — COMPLETED CONTRACTS FOR JAN–NOV 2025 (FINAL WITH INVOICE ITEMS)
 ============================================================ */
+
 DECLARE @custRole UNIQUEIDENTIFIER = (SELECT id FROM roles WHERE name='Customer');
 DECLARE @staffDefault UNIQUEIDENTIFIER = (SELECT TOP 1 user_id FROM staffs);
 DECLARE @stationA_MAIN UNIQUEIDENTIFIER = (SELECT TOP 1 id FROM stations ORDER BY name);
@@ -469,7 +470,7 @@ BEGIN
 
     DECLARE @endDate DATETIMEOFFSET = DATEADD(DAY, 3, @startDate);
 
-    /* ALL CREATED_AT WILL ALIGN TO @createdAt */
+    /* ALL CREATED_AT WILL ALIGN TO MONTH */
     DECLARE @createdAt DATETIMEOFFSET =
         DATETIMEOFFSETFROMPARTS(2025, @month, 10, 9, 0, 0, 0, 0, 7, 0);
 
@@ -496,22 +497,44 @@ BEGIN
         @createdAt, @createdAt
     );
 
-    /* RESERVATION INVOICE */
+    /* ==========================
+       RESERVATION INVOICE
+    ===========================*/
+    DECLARE @invRes UNIQUEIDENTIFIER = NEWID();
+    DECLARE @resSubtotal DECIMAL(10,2) = 100000;
+    DECLARE @resTax DECIMAL(10,2) = 0;
+    DECLARE @resPaid DECIMAL(10,2) = @resSubtotal + @resTax;
+
     INSERT INTO invoices
     (id, contract_id, type, status, subtotal, tax, payment_method,
      paid_amount, notes, created_at, updated_at)
     VALUES
     (
-        NEWID(), @contractId, 0, 1,
-        100000, 0, 0,
-        200000, N'Reservation invoice',
+        @invRes, @contractId, 0, 1,
+        @resSubtotal, @resTax, 0,
+        @resPaid, N'Reservation invoice',
         @createdAt, @createdAt
     );
 
-    /* HANDOVER INVOICE */
+    /* RESERVATION INVOICE ITEM */
+INSERT INTO invoice_items
+(id, description, quantity, unit_price, type,
+ created_at, updated_at, invoice_id)
+VALUES
+(
+    NEWID(), N'Reservation Fee', 1, @resSubtotal, 0,
+    (SELECT created_at FROM invoices WHERE id = @invRes),
+    (SELECT updated_at FROM invoices WHERE id = @invRes),
+    @invRes
+);
+
+    /* ==========================
+       HANDOVER INVOICE
+    ===========================*/
     DECLARE @invHand UNIQUEIDENTIFIER = NEWID();
     DECLARE @basePrice DECIMAL(18,2) = 300000;
     DECLARE @vat DECIMAL(18,2) = @basePrice * 0.1;
+    DECLARE @handPaid DECIMAL(18,2) = @basePrice + @vat;
 
     INSERT INTO invoices
     (id, contract_id, type, status, subtotal, tax, payment_method,
@@ -520,12 +543,24 @@ BEGIN
     (
         @invHand, @contractId, 1, 1,
         @basePrice, 0.1, 0,
-        @basePrice + @vat,
-        N'Handover invoice',
+        @handPaid, N'Handover invoice',
         @createdAt, @createdAt
     );
 
-    /* DEPOSIT */
+   /* HANDOVER INVOICE ITEM */
+INSERT INTO invoice_items
+(id, description, quantity, unit_price, type,
+ created_at, updated_at, invoice_id)
+VALUES
+(
+    NEWID(), N'Handover Base Rental', 1, @basePrice, 0,
+    (SELECT created_at FROM invoices WHERE id = @invHand),
+    (SELECT updated_at FROM invoices WHERE id = @invHand),
+    @invHand
+);
+
+
+    /* DEPOSIT LINKED TO HANDOVER */
     INSERT INTO deposits
     (id, invoice_id, amount, status, created_at, updated_at)
     VALUES
@@ -534,30 +569,59 @@ BEGIN
         1, @createdAt, @createdAt
     );
 
-    /* RETURN INVOICE */
+    /* ==========================
+       RETURN INVOICE
+    ===========================*/
+    DECLARE @invReturn UNIQUEIDENTIFIER = NEWID();
+    DECLARE @returnSubtotal DECIMAL(10,2) = 50000;
+    DECLARE @returnPaid DECIMAL(10,2) = @returnSubtotal;
+
     INSERT INTO invoices
     (id, contract_id, type, status, subtotal, tax, payment_method,
      paid_amount, notes, created_at, updated_at)
     VALUES
     (
-        NEWID(), @contractId, 2, 1,
-        50000, 0, 0,
-        50000, N'Return invoice',
+        @invReturn, @contractId, 2, 1,
+        @returnSubtotal, 0, 0,
+        @returnPaid, N'Return invoice',
         @createdAt, @createdAt
     );
 
-    /* REFUND INVOICE */
+    INSERT INTO invoice_items
+    (id, description, quantity, unit_price, type,
+     created_at, updated_at, invoice_id)
+    VALUES
+    (
+        NEWID(), N'Cleaning Fee', 1, @returnSubtotal, 3,
+        @createdAt, @createdAt, @invReturn
+    );
+
+    /* ==========================
+       REFUND INVOICE
+    ===========================*/
+    DECLARE @invRefund UNIQUEIDENTIFIER = NEWID();
+
     INSERT INTO invoices
     (id, contract_id, type, status, subtotal, tax, payment_method,
      paid_amount, notes, created_at, updated_at)
     VALUES
     (
-        NEWID(), @contractId, 3, 1,
+        @invRefund, @contractId, 3, 1,
         @depositAmount, 0, 0,
         @depositAmount, N'Refund invoice',
         @createdAt, @createdAt
     );
 
+    INSERT INTO invoice_items
+    (id, description, quantity, unit_price, type,
+     created_at, updated_at, invoice_id)
+    VALUES
+    (
+        NEWID(), N'Deposit Refund', 1, @depositAmount, 5,
+        @createdAt, @createdAt, @invRefund
+    );
+
+    /* LOOP */
     SET @i = @i + 1;
     IF @i > @uCount SET @i = 1;
     IF @i > @vCount SET @i = 1;
@@ -565,7 +629,6 @@ BEGIN
     SET @month = @month + 1;
 END;
 GO
-
 
 /* ============================================================
     SECTION 18 — MAIL SCENARIOS (A → F)
