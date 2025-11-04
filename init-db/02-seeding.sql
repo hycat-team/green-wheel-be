@@ -463,10 +463,15 @@ BEGIN
     DECLARE @modelId UNIQUEIDENTIFIER = (SELECT model_id FROM @tblVehicles ORDER BY id OFFSET (@i-1) ROWS FETCH NEXT 1 ROWS ONLY);
     DECLARE @depositAmount DECIMAL(18,2) = (SELECT deposit_fee FROM vehicle_models WHERE id = @modelId);
 
+    /* DATE FOR MONTHLY STATS */
     DECLARE @startDate DATETIMEOFFSET =
         DATETIMEOFFSETFROMPARTS(2025, @month, 10, 8, 0, 0, 0, 0, 7, 0);
 
     DECLARE @endDate DATETIMEOFFSET = DATEADD(DAY, 3, @startDate);
+
+    /* ALL CREATED_AT WILL ALIGN TO @createdAt */
+    DECLARE @createdAt DATETIMEOFFSET =
+        DATETIMEOFFSETFROMPARTS(2025, @month, 10, 9, 0, 0, 0, 0, 7, 0);
 
     DECLARE @contractId UNIQUEIDENTIFIER = NEWID();
 
@@ -475,19 +480,20 @@ BEGIN
     (id, description, notes, start_date, end_date, status,
      is_signed_by_staff, is_signed_by_customer,
      vehicle_id, customer_id, handover_staff_id, station_id,
-     actual_start_date, actual_end_date)
+     actual_start_date, actual_end_date,
+     created_at, updated_at)
     VALUES
     (
         @contractId,
         CONCAT('Completed Contract Month ', @month),
         N'Seed data for statistics',
         @startDate, @endDate,
-        4,
-        1,1,
+        4, 1,1,
         @v, @u,
         @staffDefault,
         @stationA_MAIN,
-        @startDate, @endDate
+        @startDate, @endDate,
+        @createdAt, @createdAt
     );
 
     /* RESERVATION INVOICE */
@@ -499,7 +505,7 @@ BEGIN
         NEWID(), @contractId, 0, 1,
         100000, 0, 0,
         200000, N'Reservation invoice',
-        SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET()
+        @createdAt, @createdAt
     );
 
     /* HANDOVER INVOICE */
@@ -516,7 +522,7 @@ BEGIN
         @basePrice, 0.1, 0,
         @basePrice + @vat,
         N'Handover invoice',
-        SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET()
+        @createdAt, @createdAt
     );
 
     /* DEPOSIT */
@@ -525,7 +531,7 @@ BEGIN
     VALUES
     (
         NEWID(), @invHand, @depositAmount,
-        1, SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET()
+        1, @createdAt, @createdAt
     );
 
     /* RETURN INVOICE */
@@ -537,7 +543,7 @@ BEGIN
         NEWID(), @contractId, 2, 1,
         50000, 0, 0,
         50000, N'Return invoice',
-        SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET()
+        @createdAt, @createdAt
     );
 
     /* REFUND INVOICE */
@@ -549,7 +555,7 @@ BEGIN
         NEWID(), @contractId, 3, 1,
         @depositAmount, 0, 0,
         @depositAmount, N'Refund invoice',
-        SYSDATETIMEOFFSET(), SYSDATETIMEOFFSET()
+        @createdAt, @createdAt
     );
 
     SET @i = @i + 1;
@@ -559,6 +565,7 @@ BEGIN
     SET @month = @month + 1;
 END;
 GO
+
 
 /* ============================================================
     SECTION 18 — MAIL SCENARIOS (A → F)
