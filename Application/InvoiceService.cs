@@ -385,19 +385,18 @@ namespace Application
                         UnitPrice = deposit.Amount,
                         Type = (int)InvoiceItemType.Refund,
                     });
-                    if (items == null || !items.Any())
+                    if (items != null && items.Count() > 1)
                     {
                         invoice.Notes.Concat(". Deposit is non-refundable due to business policy violation");
                         deposit.Status = (int)DepositStatus.Forfeited;
                     }
                     var customer = contract.Customer;
-                    var frontendOrigin = Environment.GetEnvironmentVariable("FRONTEND_PUBLIC_ORIGIN")
-                            ?? "https://greenwheel.site/";
                     var subject = "";
                     var body = "";
                     if (InvoiceHelper.CalculateTotalAmount(invoice) == 0)
                     {
                         invoice.Status = (int)InvoiceStatus.Paid;
+                        contract.Status = (int)RentalContractStatus.Completed; 
                         subject = "[GreenWheel] No Refund Issued – Deposit Fully Applied to Penalties";
                         var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "NoneRefundEmailTemplate.html");
                         body = System.IO.File.ReadAllText(templatePath);
@@ -423,7 +422,6 @@ namespace Application
                     }
                     if (customer.Email != null)
                     {
-
                         await _emailService.SendEmailAsync(customer.Email!, subject, body);
                     }
                     await _uow.DepositRepository.UpdateAsync(deposit);
