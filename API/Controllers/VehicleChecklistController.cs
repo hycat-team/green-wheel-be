@@ -72,7 +72,8 @@ namespace API.Controllers
         [RoleAuthorize(RoleName.Staff)]
         public async Task<IActionResult> UpdateVehicleChecklistItems(Guid id, UpdateChecklistItemReq req)
         {
-            await _vehicleChecklistService.UpdateItemsAsync(id, req.Status, req.Notes);
+            var staffClaims = HttpContext.User;
+            await _vehicleChecklistService.UpdateItemsAsync(id, req.Status, req.Notes, staffClaims);
             return Ok();
 
         }
