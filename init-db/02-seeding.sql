@@ -704,6 +704,5 @@ DROP PROCEDURE dbo.__seed_create_handover_checklist;
 GO
 
 Update invoices set tax = 0.1 where type = 1
-Update vehicle_models set reservation_fee = 10000
 GO
 

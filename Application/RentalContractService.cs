@@ -195,20 +195,28 @@ namespace Application
 
         public async Task HandoverProcessRentalContractAsync(ClaimsPrincipal userClaims, Guid id, HandoverContractReq req)
         {
+            var contract = await _uow.RentalContractRepository.GetByIdAsync(id)
+                    ?? throw new NotFoundException(Message.RentalContractMessage.NotFound);
+            //CHECK AUTHORIZATION
             var userId = userClaims.FindFirst(JwtRegisteredClaimNames.Sid)!.Value.ToString();
-            var user = await _staffRepository.GetByUserIdAsync(Guid.Parse(userId));
-            if(user != null)
+            //var user = await _staffRepository.GetByUserIdAsync(Guid.Parse(userId));
+            var userInDB = await _uow.UserRepository.GetByIdAsync(Guid.Parse(userId));
+            var roles = _cache.Get<List<Role>>(Common.SystemCache.AllRoles);
+            var userRole = roles!.FirstOrDefault(r => r.Id == userInDB!.RoleId)!.Name;
+            if (userRole == RoleName.Staff)
             {
-                if(!(await VerifyStaffPermission(userClaims, id)))
+                if (!(await VerifyStaffPermission(userClaims, id)))
                 {
                     throw new ForbidenException(Message.UserMessage.DoNotHavePermission);
                 }
             }
+            else
+            { 
+                if (contract!.CustomerId != Guid.Parse(userId)) throw new ForbidenException(Message.UserMessage.DoNotHavePermission);
+            }
             await _uow.BeginTransactionAsync();
             try
             {
-                var contract = await _uow.RentalContractRepository.GetByIdAsync(id)
-                    ?? throw new NotFoundException(Message.RentalContractMessage.NotFound);
                 if (contract.ActualStartDate != null) throw new BusinessException(Message.RentalContractMessage.ContractAlreadyProcess);
                 if (contract.StartDate > DateTimeOffset.UtcNow)
                 {
