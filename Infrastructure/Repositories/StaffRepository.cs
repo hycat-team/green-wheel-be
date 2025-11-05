@@ -1,4 +1,5 @@
-﻿using Application.Repositories;
+﻿using Application.Constants;
+using Application.Repositories;
 using Domain.Commons;
 using Domain.Entities;
 using Infrastructure.ApplicationDbContext;
@@ -70,7 +71,7 @@ namespace Infrastructure.Repositories
         public async Task<int> CountAvailableStaffInStationAsync(Guid stationId)
         {
             return await _dbContext.Staffs
-                .Where(s => s.StationId == stationId && s.DeletedAt == null)
+                .Where(s => s.StationId == stationId && s.User.Role.Name == RoleName.Staff && s.DeletedAt == null)
                 .CountAsync();
         }
 

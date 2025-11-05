@@ -87,7 +87,7 @@ namespace Application
             // Build description DTO
             var descriptionDto = new DispatchDescriptionDto
             {
-                NumberOfStaff = req.NumberOfStaff ?? 0,
+                NumberOfStaffs = req.NumberOfStaffs ?? 0,
                 Vehicles = []
             };
 
@@ -147,9 +147,10 @@ namespace Application
                 ?? throw new NotFoundException(Message.DispatchMessage.NotFound);
             var description = JsonHelper.DeserializeJSON<DispatchDescriptionDto>(entity.Description)
                 ?? throw new JsonException(Message.JsonMessage.ParsingFailed);
-            var stations = await _stationRepository.GetAllAsync();
+
+            var stations = (await _stationRepository.GetAllAsync()).Where(s => s.Id != entity.ToStationId);
             var validStations = new List<Station>();
-            if (description.NumberOfStaff > 0 || (description.Vehicles != null && description.Vehicles.Count > 0))
+            if (description.NumberOfStaffs > 0 || (description.Vehicles != null && description.Vehicles.Count > 0))
             {
                 foreach (var station in stations)
                 {
@@ -190,9 +191,9 @@ namespace Application
                         currentAdminStationId,
                         entity.FromStationId!.Value,
                         currentStatus,
-                        [DispatchRequestStatus.Pending],
+                        [DispatchRequestStatus.Approved],
                         Message.UserMessage.DoNotHavePermission,
-                        Message.DispatchMessage.OnlyPendingCanApproveReject);
+                        Message.DispatchMessage.OnlyApproveCanAssign);
 
                     //if (req.StaffIds == null || req.VehicleIds == null)
                     //    throw new BadRequestException(Message.DispatchMessage.IdNull);
@@ -205,7 +206,7 @@ namespace Application
                         .Where(s => s.StationId == entity.FromStationId)
                         .ToArray();
 
-                    if (requireDescription.NumberOfStaff != filteredStaffs.Length)
+                    if (requireDescription.NumberOfStaffs != filteredStaffs.Length)
                         throw new BadRequestException(Message.DispatchMessage.InvalidNumberOfStaffs);
 
                     var vehicles = await _vehicleRepository.GetByIdsAsync(req.VehicleIds);
@@ -271,7 +272,7 @@ namespace Application
                         currentStatus,
                         [DispatchRequestStatus.Assigned],
                         Message.UserMessage.DoNotHavePermission,
-                        Message.DispatchMessage.OnlyConfirmCanReceive);
+                        Message.DispatchMessage.OnlyAssignCanReceive);
 
                     entity.Status = (int)DispatchRequestStatus.Received;
 
@@ -284,7 +285,7 @@ namespace Application
                         currentAdminStationId,
                         entity.ToStationId,
                         currentStatus,
-                        [DispatchRequestStatus.Pending, DispatchRequestStatus.Approved],
+                        [DispatchRequestStatus.Pending],
                         Message.UserMessage.DoNotHavePermission,
                         Message.DispatchMessage.OnlyPendingCanCancel);
 
@@ -334,13 +335,13 @@ namespace Application
                 ?? throw new JsonException(Message.JsonMessage.ParsingFailed);
 
             //Validate staff
-            if (description.NumberOfStaff > 0)
+            if (description.NumberOfStaffs > 0)
             {
                 var availableStaffCount = await _staffRepository.CountAvailableStaffInStationAsync(fromStationId);
-                if (description.NumberOfStaff > availableStaffCount)
+                if (description.NumberOfStaffs > availableStaffCount)
                     throw new BadRequestException(Message.DispatchMessage.StaffNotEnoughtInFromStation);
 
-                if (description.NumberOfStaff == availableStaffCount)
+                if (description.NumberOfStaffs == availableStaffCount)
                     throw new BadRequestException(Message.DispatchMessage.StaffLimitInFromStation);
             }
 

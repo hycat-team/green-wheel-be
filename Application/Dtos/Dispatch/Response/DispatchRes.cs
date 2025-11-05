@@ -38,7 +38,7 @@ namespace Application.Dtos.Dispatch.Response
 
     public class DispatchDescriptionDto
     {
-        public int NumberOfStaff { get; set; }
+        public int NumberOfStaffs { get; set; }
         public IList<DispatchDescriptionVehicleDto>? Vehicles { get; set; }
     }
 }

@@ -8,6 +8,6 @@ namespace Application.Dtos.Dispatch.Request
         //public Guid FromStationId { get; set; }
         public VehicleDispatchReq[] Vehicles { get; set; } = [];
 
-        public int? NumberOfStaff { get; set; }
+        public int? NumberOfStaffs { get; set; }
     }
 }
