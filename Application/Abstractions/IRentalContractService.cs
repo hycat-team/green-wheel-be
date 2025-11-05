@@ -21,14 +21,14 @@ namespace Application.Abstractions
         Task<RentalContractViewRes> GetByIdAsync(Guid id);
 
         //Task<IEnumerable<RentalContractViewRes>> GetAll(GetAllRentalContactReq req);
-        Task<PageResult<RentalContractViewRes>> GetAllByPagination(GetAllRentalContactReq req, PaginationParams pagination);
+        Task<IEnumerable<RentalContractViewRes>> GetAllByPagination(GetAllRentalContactReq req);
 
         Task HandoverProcessRentalContractAsync(ClaimsPrincipal staffClaims, Guid id, HandoverContractReq req);
         Task<Guid> ReturnProcessRentalContractAsync(ClaimsPrincipal staffClaims, Guid id);
 
         //Task<IEnumerable<RentalContractViewRes>> GetMyContracts(ClaimsPrincipal userClaims, int? status);
-        Task<PageResult<RentalContractViewRes>> GetMyContractsByPagination(
-            ClaimsPrincipal user, PaginationParams pagination, int? status, Guid? stationId);
+        Task<IEnumerable<RentalContractViewRes>> GetMyContractsByPagination(
+            ClaimsPrincipal user, int? status, Guid? stationId);
 
         Task CancelRentalContract(Guid id, ClaimsPrincipal userClaims);
         Task ChangeVehicleAsync(Guid id);

@@ -17,8 +17,8 @@ namespace Application.Repositories
             string? citizenIdentity = null, string? driverLicense = null, Guid? checklistId = null);
         Task<RentalContract?> GetByChecklistIdAsync(Guid id);
         Task<IEnumerable<RentalContract>> GetByVehicleIdAsync(Guid vehicleId);
-        Task<PageResult<RentalContract>> GetAllByPaginationAsync(int? status = null, string? phone = null, string? citizenIdentityNumber = null, string? driverLicenseNumber = null, Guid? stationId = null, PaginationParams? pagination = null);
-        Task<PageResult<RentalContract>> GetMyContractsAsync(Guid customerId, PaginationParams pagination,
+        Task<IEnumerable<RentalContract>> GetAllByPaginationAsync(int? status = null, string? phone = null, string? citizenIdentityNumber = null, string? driverLicenseNumber = null, Guid? stationId = null);
+        Task<IEnumerable<RentalContract>> GetMyContractsAsync(Guid customerId,
             int? status, Guid? stationId = null);
         Task<IEnumerable<RentalContract>> GetLateReturnContract();
         Task<IEnumerable<RentalContract>> GetExpiredContractAsync();

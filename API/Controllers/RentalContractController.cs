@@ -92,10 +92,9 @@ namespace API.Controllers
         [RoleAuthorize(RoleName.Staff)]
         [HttpGet]
         public async Task<IActionResult> GetAll(
-            [FromQuery] GetAllRentalContactReq req,
-            [FromQuery] PaginationParams pagination)
+            [FromQuery] GetAllRentalContactReq req)
         {
-            var result = await _rentalContractService.GetAllByPagination(req, pagination);
+            var result = await _rentalContractService.GetAllByPagination(req);
             return Ok(result);
         }
 
@@ -145,12 +144,11 @@ namespace API.Controllers
         [RoleAuthorize(RoleName.Customer)]
         [HttpGet("me")]
         public async Task<IActionResult> GetMyContracts(
-            [FromQuery] PaginationParams pagination,
             [FromQuery] int? status,
             [FromQuery] Guid? stationId)
         {
             var user = HttpContext.User;
-            var result = await _rentalContractService.GetMyContractsByPagination(user, pagination, status, stationId);
+            var result = await _rentalContractService.GetMyContractsByPagination(user, status, stationId);
             return Ok(result);
         }
 

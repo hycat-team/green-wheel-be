@@ -60,16 +60,16 @@ namespace Application
             try
             {
                 //ktra xem có cccd hay chưa
-                var citizenIdentity = await _uow.CitizenIdentityRepository.GetByUserIdAsync(userID);
-                if (citizenIdentity == null)
-                {
-                    throw new ForbidenException(Message.UserMessage.CitizenIdentityNotFound);
-                }
-                var driverLisence = await _uow.DriverLicenseRepository.GetByUserIdAsync(userID);
-                if (driverLisence == null)
-                {
-                    throw new ForbidenException(Message.UserMessage.DriverLicenseNotFound);
-                }
+                //var citizenIdentity = await _uow.CitizenIdentityRepository.GetByUserIdAsync(userID);
+                //if (citizenIdentity == null)
+                //{
+                //    throw new ForbidenException(Message.UserMessage.CitizenIdentityNotFound);
+                //}
+                //var driverLisence = await _uow.DriverLicenseRepository.GetByUserIdAsync(userID);
+                //if (driverLisence == null)
+                //{
+                //    throw new ForbidenException(Message.UserMessage.DriverLicenseNotFound);
+                //}
                 //---------
                 //ktra có đơn đặt xe chưa
                 if (await _uow.RentalContractRepository.HasActiveContractAsync(userID))
@@ -715,45 +715,31 @@ namespace Application
             }
         }
 
-        public async Task<PageResult<RentalContractViewRes>> GetAllByPagination(
-            GetAllRentalContactReq req, PaginationParams pagination)
+        public async Task<IEnumerable<RentalContractViewRes>> GetAllByPagination(
+            GetAllRentalContactReq req)
         {
             var pageResult = await _uow.RentalContractRepository.GetAllByPaginationAsync(
                 req.Status,
                 req.Phone,
                 req.CitizenIdentityNumber,
                 req.DriverLicenseNumber,
-                req.StationId,
-                pagination);
+                req.StationId);
 
-            var mapped = _mapper.Map<IEnumerable<RentalContractViewRes>>(pageResult.Items);
-
-            return new PageResult<RentalContractViewRes>(
-                mapped,
-                pageResult.PageNumber,
-                pageResult.PageSize,
-                pageResult.Total
-            );
+            return _mapper.Map<IEnumerable<RentalContractViewRes>>(pageResult) ?? [];
         }
 
-        public async Task<PageResult<RentalContractViewRes>> GetMyContractsByPagination(
+        public async Task<IEnumerable<RentalContractViewRes>> GetMyContractsByPagination(
             ClaimsPrincipal user,
-            PaginationParams pagination,
             int? status, Guid? stationId)
         {
             var customerId = Guid.Parse(user.FindFirstValue(JwtRegisteredClaimNames.Sid)!);
 
             var result = await _uow.RentalContractRepository
-                .GetMyContractsAsync(customerId, pagination, status, stationId);
+                .GetMyContractsAsync(customerId, status, stationId);
 
-            var mapped = _mapper.Map<IEnumerable<RentalContractViewRes>>(result.Items);
+            return _mapper.Map<IEnumerable<RentalContractViewRes>>(result) ?? [];
 
-            return new PageResult<RentalContractViewRes>(
-                mapped,
-                result.PageNumber,
-                result.PageSize,
-                result.Total
-            );
+           
         }
         private int CalculateLateReturnHours(DateTimeOffset expectedReturnDate, DateTimeOffset actualReturnDate)
         {

@@ -124,13 +124,12 @@ namespace Infrastructure.Repositories
             return list ?? [];
         }
 
-        public async Task<PageResult<RentalContract>> GetAllByPaginationAsync(
+        public async Task<IEnumerable<RentalContract>> GetAllByPaginationAsync(
             int? status = null,
             string? phone = null,
             string? citizenIdentityNumber = null,
             string? driverLicenseNumber = null,
-            Guid? stationId = null,
-            PaginationParams? pagination = null)
+            Guid? stationId = null)
         {
             var query = _dbContext.RentalContracts
                 .Include(x => x.Vehicle).ThenInclude(v => v == null ? null : v.Model)
@@ -153,26 +152,10 @@ namespace Infrastructure.Repositories
             if (stationId != null)
                 query = query.Where(rc => rc.StationId == stationId);
 
-            var total = await query.CountAsync();
-
-            if (pagination != null)
-            {
-                query = query
-                    .Skip((pagination.PageNumber - 1) * pagination.PageSize)
-                    .Take(pagination.PageSize);
-            }
-
-            var items = await query.ToListAsync();
-
-            return new PageResult<RentalContract>(
-                items,
-                pagination?.PageNumber ?? 1,
-                pagination?.PageSize ?? total,
-                total
-            );
+            return await query.ToListAsync();
         }
-        public async Task<PageResult<RentalContract>> GetMyContractsAsync(
-            Guid customerId, PaginationParams pagination,
+        public async Task<IEnumerable<RentalContract>> GetMyContractsAsync(
+            Guid customerId,
             int? status, Guid? stationId = null)
         {
             var query = _dbContext.RentalContracts
@@ -188,20 +171,8 @@ namespace Infrastructure.Repositories
             if (stationId != null)
                 query = query.Where(rc => rc.StationId == stationId);
 
-            var total = await query.CountAsync();
-
-            var items = await query
-                .OrderByDescending(rc => rc.CreatedAt)
-                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
-                .Take(pagination.PageSize)
-                .ToListAsync();
-
-            return new PageResult<RentalContract>(
-                items,
-                pagination.PageNumber,
-                pagination.PageSize,
-                total
-            );
+            return await query.ToListAsync();
+            
         }
 
         public async Task<IEnumerable<RentalContract>> GetLateReturnContract()
