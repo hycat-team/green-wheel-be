@@ -243,5 +243,16 @@ namespace API.Controllers
             var res = await _vehicleModelService.GetAllModelMainImage();
             return Ok(res);
         }
+
+        /// <summary>
+        /// Get best sellers 
+        /// </summary>
+        /// <response code="200">Success.</response>
+        [HttpGet("best-booking")]
+        public async Task<IActionResult> GetBestRentedModelsAsync([FromQuery] int? months = 3, [FromQuery] int? limit = 3)
+        {
+            var res = await _vehicleModelService.GetBestRentedModelsAsync((int)months!, (int)limit!);
+            return Ok(res);
+        }
     }
 }
