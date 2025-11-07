@@ -49,7 +49,7 @@ namespace Infrastructure.Repositories
                 query = query.Where(u => u.DriverLicense != null && u.DriverLicense.Number == driverLicenseNumber);
 
             if (!string.IsNullOrEmpty(roleName))
-                query = query.Where(u => u.Role.Name.ToLower().Contains(roleName.ToLower()));
+                query = query.Where(u => u.Role.Name.ToLower() == roleName.ToLower());
 
             if (stationId != null)
                 query = query.Where(u => u.Staff != null && u.Staff.StationId == stationId);
