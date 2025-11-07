@@ -1,4 +1,5 @@
 ﻿using Application.Dtos.BusinessVariable.Request;
+using Application.Dtos.Vehicle.Request;
 using Application.Dtos.VehicleChecklist.Request;
 using Application.Dtos.VehicleChecklistItem.Request;
 using Application.Dtos.VehicleSegment.Request;
@@ -105,6 +106,7 @@ namespace Application.Constants
             public const string LicensePlateRequired = "vehicle.license_plate_required";
             public const string StationIdRequired = "vehicle.station_id_required";
             public const string ModelIdRequired = "vehicle.model_id_required";
+            public const string InvalidLicensePlateFormat = "vehicle.invalid_license_plate_format";
         }
 
         public static class VehicleModelMessage
