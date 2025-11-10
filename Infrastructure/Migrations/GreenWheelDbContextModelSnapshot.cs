@@ -1138,6 +1138,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("first_name");
 
+                    b.Property<bool>("HasSeenTutorial")
+                        .HasColumnType("bit")
+                        .HasColumnName("has_seen_tutorial");
+
                     b.Property<bool>("IsGoogleLinked")
                         .HasColumnType("bit")
                         .HasColumnName("is_google_linked");
