@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(GreenWheelDbContext))]
-    [Migration("20251105042128_change_fromstation_of_dispatch_to_nullable")]
-    partial class change_fromstation_of_dispatch_to_nullable
+    [Migration("20251110084309_addHasSeenTutorialToTableUsers")]
+    partial class addHasSeenTutorialToTableUsers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -271,8 +271,7 @@ namespace Infrastructure.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("description");
 
                     b.Property<Guid?>("FromStationId")
@@ -1141,6 +1140,10 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("first_name");
+
+                    b.Property<bool>("HasSeenTutorial")
+                        .HasColumnType("bit")
+                        .HasColumnName("has_seen_tutorial");
 
                     b.Property<bool>("IsGoogleLinked")
                         .HasColumnType("bit")

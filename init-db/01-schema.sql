@@ -48,7 +48,7 @@ CREATE TABLE [users] (
     [avatar_url] nvarchar(500),
     [avatar_public_id] nvarchar(255),
 	[is_google_linked] bit NOT NULL DEFAULT 0,
-
+	[has_seen_tutorial] bit NOT NULL DEFAULT 0,
     [created_at] datetimeoffset NOT NULL DEFAULT SYSDATETIMEOFFSET(),
     [updated_at] datetimeoffset NOT NULL DEFAULT SYSDATETIMEOFFSET(),
     [deleted_at] datetimeoffset,
