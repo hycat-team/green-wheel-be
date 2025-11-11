@@ -218,10 +218,10 @@ namespace Application
             try
             {
                 if (contract.ActualStartDate != null) throw new BusinessException(Message.RentalContractMessage.ContractAlreadyProcess);
-                if (contract.StartDate > DateTimeOffset.UtcNow)
-                {
-                    throw new BadRequestException(Message.RentalContractMessage.ContractNotStartYet);
-                }
+                //if (contract.StartDate > DateTimeOffset.UtcNow)
+                //{
+                //    throw new BadRequestException(Message.RentalContractMessage.ContractNotStartYet);
+                //}
                 var vehicle = await _uow.VehicleRepository.GetByIdAsync((Guid)contract.VehicleId!)
                     ?? throw new NotFoundException(Message.VehicleMessage.NotFound);
 
@@ -229,11 +229,11 @@ namespace Application
                     .Where(i => i.Type == (int)InvoiceType.Handover).FirstOrDefault()
                         ?? throw new NotFoundException(Message.InvoiceMessage.NotFound);
 
-                if (contract.VehicleChecklists == null ||
-                    !contract.VehicleChecklists.Any(c => c.Type == (int)VehicleChecklistType.Handover))
-                {
-                    throw new NotFoundException(Message.VehicleChecklistMessage.NotFound);
-                }
+                //if (contract.VehicleChecklists == null ||
+                //    !contract.VehicleChecklists.Any(c => c.Type == (int)VehicleChecklistType.Handover))
+                //{
+                //    throw new NotFoundException(Message.VehicleChecklistMessage.NotFound);
+                //}
                 if (contract.Status == (int)RentalContractStatus.Active && handoverInvoice.Status == (int)InvoiceStatus.Paid)
                 {
                     if (vehicle == null)
@@ -253,7 +253,10 @@ namespace Application
                     contract.IsSignedByStaff = req.IsSignedByStaff;
                     contract.HandoverStaffId = Guid.Parse(userId);
                 }
-                contract.IsSignedByCustomer = req.IsSignedByCustomer;
+                if(contract.IsSignedByCustomer == false)
+                {
+                    contract.IsSignedByCustomer = req.IsSignedByCustomer;
+                }
                 if (contract.IsSignedByCustomer && contract.IsSignedByStaff)
                 {
                     contract.ActualStartDate = DateTimeOffset.UtcNow;
