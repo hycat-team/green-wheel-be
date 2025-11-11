@@ -9,19 +9,18 @@ namespace Application.Repositories
 
         Task DeleteAsync(Guid id);
 
-        Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, object>>[]? includes = null);
+        Task<IEnumerable<T>> GetAllAsync(
+            Expression<Func<T, object>>[]? includes = null,
+            Expression<Func<T, bool>>? predicate = null
+        );
 
         Task<int> UpdateAsync(T entity);
 
         Task<T?> GetByIdAsync(Guid id);
 
-        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
-
         Task AddRangeAsync(IEnumerable<T> entities);
 
         void Remove(T entity);
-
-        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
 
         Task<T[]> GetByIdsAsync(Guid[] ids);
     }

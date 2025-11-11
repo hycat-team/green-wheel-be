@@ -44,13 +44,13 @@ public class StationFeedbackService : IStationFeedbackService
 
     public async Task<IEnumerable<StationFeedbackRes>> GetByStationIdAsync(Guid stationId)
     {
-        var list = await _repo.FindAsync(f => f.StationId == stationId, f => f.Customer) ?? [];
+        var list = await _repo.GetAllAsync([f => f.Customer], f => f.StationId == stationId) ?? [];
         return _mapper.Map<IEnumerable<StationFeedbackRes>>(list);
     }
 
     public async Task<IEnumerable<StationFeedbackRes>> GetByCustomerIdAsync(Guid customerId)
     {
-        var list = await _repo.FindAsync(f => f.CustomerId == customerId, f => f.Customer) ?? [];
+        var list = await _repo.GetAllAsync([f => f.Customer], f => f.CustomerId == customerId) ?? [];
         return _mapper.Map<IEnumerable<StationFeedbackRes>>(list);
     }
 
@@ -61,5 +61,4 @@ public class StationFeedbackService : IStationFeedbackService
 
         return new PageResult<StationFeedbackRes>(data, page.PageNumber, page.PageSize, page.Total);
     }
-
 }

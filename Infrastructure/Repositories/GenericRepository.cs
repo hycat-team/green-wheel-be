@@ -41,9 +41,17 @@ namespace Infrastructure.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, object>>[]? includes = null)
+        public virtual async Task<IEnumerable<T>> GetAllAsync(
+            Expression<Func<T, object>>[]? includes = null,
+            Expression<Func<T, bool>>? predicate = null
+        )
         {
             var query = _dbSet.AsQueryable();
+
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
 
             if (includes != null)
             {
@@ -101,11 +109,6 @@ namespace Infrastructure.Repositories
             return await _dbContext.SaveChangesAsync();
         }
 
-        public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
-        {
-            return await _dbSet.Where(predicate).ToListAsync();
-        }
-
         public virtual void Remove(T entity)
         {
             _dbSet.Remove(entity);
@@ -117,20 +120,6 @@ namespace Infrastructure.Repositories
                 return;
 
             await _dbSet.AddRangeAsync(entities);
-        }
-
-        public virtual async Task<IEnumerable<T>> FindAsync(
-            Expression<Func<T, bool>> predicate,
-            params Expression<Func<T, object>>[] includes)
-        {
-            IQueryable<T> query = _dbSet.Where(predicate);
-
-            foreach (var include in includes)
-            {
-                query = query.Include(include);
-            }
-
-            return await query.ToListAsync();
         }
     }
 }

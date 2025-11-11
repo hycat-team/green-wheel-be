@@ -244,6 +244,20 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Deletes both the main image and all gallery images of a specific vehicle model.
+        /// </summary>
+        /// <param name="modelId">The unique identifier of the vehicle model.</param>
+        /// <response code="200">Success.</response>
+        /// <response code="404">Vehicle model not found.</response>
+        [HttpDelete("{modelId}/images")]
+        [RoleAuthorize(RoleName.SuperAdmin, RoleName.Admin)]
+        public async Task<IActionResult> DeleteAllImages([FromRoute] Guid modelId)
+        {
+            await _modelImageService.DeleteAllModelImagesAsync(modelId);
+            return Ok();
+        }
+
+        /// <summary>
         /// Uploads both the main image and gallery images for a specific vehicle model.
         /// </summary>
         /// <param name="id">Model id.</param>
@@ -270,7 +284,7 @@ namespace API.Controllers
         // }
 
         /// <summary>
-        /// Get best sellers 
+        /// Get best sellers
         /// </summary>
         /// <response code="200">Success.</response>
         [HttpGet("best-booking")]

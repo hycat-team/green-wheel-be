@@ -211,7 +211,7 @@ namespace Application
                 }
             }
             else
-            { 
+            {
                 if (contract!.CustomerId != Guid.Parse(userId)) throw new ForbidenException(Message.UserMessage.DoNotHavePermission);
             }
             await _uow.BeginTransactionAsync();
@@ -253,7 +253,7 @@ namespace Application
                     contract.IsSignedByStaff = req.IsSignedByStaff;
                     contract.HandoverStaffId = Guid.Parse(userId);
                 }
-                if(contract.IsSignedByCustomer == false)
+                if (contract.IsSignedByCustomer == false)
                 {
                     contract.IsSignedByCustomer = req.IsSignedByCustomer;
                 }
@@ -347,12 +347,13 @@ namespace Application
                 throw;
             }
         }
+
         public async Task CancelRentalContract(Guid id, ClaimsPrincipal userClaims)
         {
             var userId = userClaims.FindFirst(JwtRegisteredClaimNames.Sid)!.Value.ToString();
             var contract = await _uow.RentalContractRepository.GetByIdAsync(id)
                 ?? throw new NotFoundException(Message.RentalContractMessage.NotFound);
-            if(contract.CustomerId != Guid.Parse(userId))
+            if (contract.CustomerId != Guid.Parse(userId))
             {
                 throw new ForbidenException(Message.UserMessage.DoNotHavePermission);
             }
@@ -427,7 +428,7 @@ namespace Application
 
         public async Task VerifyRentalContract(Guid id, ConfirmReq req, ClaimsPrincipal staffClaims)
         {
-            if(!(await VerifyStaffPermission(staffClaims, id)))
+            if (!(await VerifyStaffPermission(staffClaims, id)))
             {
                 throw new ForbidenException(Message.UserMessage.DoNotHavePermission);
             }
@@ -466,10 +467,9 @@ namespace Application
                     rentalContract.Status = (int)RentalContractStatus.PaymentPending;
                     await _uow.RentalContractRepository.UpdateAsync(rentalContract);
                     //Lấy invoice
-                    var invoice = (await _uow.RentalContractRepository.GetAllAsync(new Expression<Func<RentalContract, object>>[]
-                    {
-                rc => rc.Invoices
-                    })).Where(rc => rc.Id == id)
+                    var invoice = (await _uow.RentalContractRepository.GetAllAsync(
+                        [rc => rc.Invoices]
+                    )).Where(rc => rc.Id == id)
                     .Select(rc => rc.Invoices).FirstOrDefault();
 
                     subject = "[GreenWheel] Confirm Your Booking by Completing Payment";
@@ -758,6 +758,7 @@ namespace Application
                 result.Total
             );
         }
+
         private int CalculateLateReturnHours(DateTimeOffset expectedReturnDate, DateTimeOffset actualReturnDate)
         {
             var businessVariables = _cache!.Get<List<BusinessVariable>>(Common.SystemCache.BusinessVariables);
@@ -865,15 +866,16 @@ namespace Application
         {
             if (Guid.TryParse(staffClaims.FindFirst(JwtRegisteredClaimNames.Sid)!.Value.ToString(), out var staffId))
             {
-                var staff = await _staffRepository.GetByUserIdAsync(staffId) 
+                var staff = await _staffRepository.GetByUserIdAsync(staffId)
                     ?? throw new NotFoundException(Message.UserMessage.NotFound);
                 var contract = await _uow.RentalContractRepository.GetByIdAsync(contractId)
                     ?? throw new NotFoundException(Message.RentalContractMessage.NotFound);
-                if(staff.StationId == contract.StationId)
+                if (staff.StationId == contract.StationId)
                 {
                     return true;
                 }
-            };
+            }
+            
             return false;
         }
     }

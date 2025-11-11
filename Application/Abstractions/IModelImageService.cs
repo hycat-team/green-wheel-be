@@ -11,6 +11,6 @@ namespace Application.Abstractions
 
         Task<VehicleModelImagesRes> UploadAllModelImagesAsync(Guid modelId, List<IFormFile> files);
         Task<IEnumerable<VehicleModelMainImageRes>> GetAllVehicleModelMainImagesAsync();
-
+        Task DeleteAllModelImagesAsync(Guid modelId);
     }
 }
