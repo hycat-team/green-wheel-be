@@ -13,5 +13,6 @@
         public string FrontImageUrl { get; set; } = null!;
 
         public string BackImageUrl { get; set; } = null!;
+        public DateTimeOffset SignedUrlExpiresAt { get; set; }
     }
 }

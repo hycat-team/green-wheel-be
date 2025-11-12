@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions;
 using Application.AppExceptions;
 using Application.Constants;
+using Application.Dtos.CitizenIdentity.Response;
 using Application.Helpers;
 using Application.Repositories;
 using Domain.Entities;
@@ -45,10 +46,27 @@ namespace Application
             return citizenIdentity;
         }
 
-        public async Task<CitizenIdentity?> GetByUserId(Guid userId)
-            => await _citizenRepo.GetByUserIdAsync(userId);
+        public async Task<CitizenIdentityRes?> GetByUserId(Guid userId)
+        {
+            var entity = await _citizenRepo.GetByUserIdAsync(userId)
+                ?? throw new NotFoundException(Message.UserMessage.CitizenIdentityNotFound);
 
-        public async Task<CitizenIdentity?> ProcessCitizenIdentityAsync(Guid userId,
+            return new CitizenIdentityRes
+            {
+                Id = entity.Id,
+                Number = entity.Number,
+                FullName = entity.FullName,
+                Nationality = entity.Nationality,
+                Sex = entity.Sex == 0 ? "Male" : "Female",
+                DateOfBirth = entity.DateOfBirth,
+                ExpiresAt = entity.ExpiresAt,
+                FrontImageUrl = _photoService.GetSignedUrl(entity.FrontImagePublicId, 300),
+                BackImageUrl = _photoService.GetSignedUrl(entity.BackImagePublicId, 300),
+                SignedUrlExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5)
+            };
+        }
+
+        public async Task<CitizenIdentityRes?> ProcessCitizenIdentityAsync(Guid userId,
             string frontImageUrl, string frontPublicId, string backImageUrl, string backPublicId)
         {
             var dto = await _geminiService.ExtractCitizenIdAsync(frontImageUrl);
@@ -86,8 +104,21 @@ namespace Application
                 entity.CreatedAt = DateTimeOffset.UtcNow;
                 await _citizenRepo.AddAsync(entity);
             }
-
-            return entity;
+            var signedFront = _photoService.GetSignedUrl(frontPublicId, 300);
+            var signedBack = _photoService.GetSignedUrl(backPublicId, 300);
+            return new CitizenIdentityRes
+            {
+                Id = entity.Id,
+                Number = entity.Number,
+                FullName = entity.FullName,
+                Nationality = entity.Nationality,
+                Sex = entity.Sex == 0 ? "Male" : "Female",
+                DateOfBirth = entity.DateOfBirth,
+                ExpiresAt = entity.ExpiresAt,
+                FrontImageUrl = signedFront,
+                BackImageUrl = signedBack,
+                SignedUrlExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5)
+            };
         }
 
         public async Task<bool> RemoveAsync(Guid userId, string publicId)

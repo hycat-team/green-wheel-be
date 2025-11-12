@@ -2,6 +2,7 @@
 using Application.AppExceptions;
 using Application.Constants;
 using Application.Dtos.DriverLicense.Request;
+using Application.Dtos.DriverLicense.Response;
 using Application.Helpers;
 using Application.Repositories;
 using Domain.Entities;
@@ -36,8 +37,26 @@ namespace Application
         public async Task<DriverLicense?> GetAsync(Guid id)
             => await _licenseRepo.GetByIdAsync(id);
 
-        public async Task<DriverLicense?> GetByUserIdAsync(Guid userId)
-            => await _licenseRepo.GetByUserIdAsync(userId);
+        public async Task<DriverLicenseRes?> GetByUserIdAsync(Guid userId)
+        {
+            var entity = await _licenseRepo.GetByUserIdAsync(userId)
+                ?? throw new NotFoundException(Message.UserMessage.DriverLicenseNotFound);
+
+            return new DriverLicenseRes
+            {
+                Id = entity.Id,
+                Number = entity.Number,
+                FullName = entity.FullName,
+                Nationality = entity.Nationality,
+                Sex = entity.Sex == 0 ? "Male" : "Female",
+                Class = entity.Class.ToString(),
+                DateOfBirth = entity.DateOfBirth,
+                ExpiresAt = entity.ExpiresAt,
+                FrontImageUrl = _photoService.GetSignedUrl(entity.FrontImagePublicId, 300),
+                BackImageUrl = _photoService.GetSignedUrl(entity.BackImagePublicId, 300),
+                SignedUrlExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5)
+            };
+        }
 
         public async Task<DriverLicense?> GetByLicenseNumberAsync(string licenseNumber)
         {
@@ -72,7 +91,7 @@ namespace Application
             return license;
         }
 
-        public async Task<DriverLicense?> ProcessDriverLicenseAsync(Guid userId,
+        public async Task<DriverLicenseRes?> ProcessDriverLicenseAsync(Guid userId,
             string frontImageUrl, string frontPublicId, string backImageUrl, string backPublicId)
         {
             var dto = await _geminiService.ExtractDriverLicenseAsync(frontImageUrl);
@@ -117,7 +136,23 @@ namespace Application
                 await _licenseRepo.AddAsync(entity);
             }
 
-            return entity;
+            var signedFront = _photoService.GetSignedUrl(frontPublicId, 300);
+            var signedBack = _photoService.GetSignedUrl(backPublicId, 300);
+
+            return new DriverLicenseRes
+            {
+                Id = entity.Id,
+                Number = entity.Number,
+                FullName = entity.FullName,
+                Nationality = entity.Nationality,
+                Sex = entity.Sex == 0 ? "Male" : "Female",
+                Class = entity.Class.ToString(),
+                DateOfBirth = entity.DateOfBirth,
+                ExpiresAt = entity.ExpiresAt,
+                FrontImageUrl = signedFront,
+                BackImageUrl = signedBack,
+                SignedUrlExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5)
+            };
         }
 
         private static int ParseSex(string? sexStr)

@@ -11,5 +11,6 @@ namespace Application.Abstractions
 
         //delete image
         Task<bool> DeletePhotoAsync(string publicId);
+        string GetSignedUrl(string publicId, int expireInSeconds = 300);
     }
 }

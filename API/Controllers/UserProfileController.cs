@@ -1,6 +1,8 @@
-﻿using API.Filters;
+﻿using API.Extentions;
+using API.Filters;
 using Application;
 using Application.Abstractions;
+using Application.AppExceptions;
 using Application.Constants;
 using Application.Dtos.CitizenIdentity.Request;
 using Application.Dtos.Common.Request;
@@ -18,10 +20,12 @@ namespace API.Controllers
     /// </summary>
     [Route("api/me")]
     [ApiController]
-    public class UserProfileController(IUserProfileSerivce service) : ControllerBase
+    public class UserProfileController(IUserProfileSerivce service, IPhotoService photoService, ICitizenIdentityService citizenIdentityService, IImageSessionService sessionService) : ControllerBase
     {
         private readonly IUserProfileSerivce _userProfileService = service;
-
+        private readonly IPhotoService _photoService = photoService;
+        private readonly ICitizenIdentityService _citizenIdentityService = citizenIdentityService;
+        private readonly IImageSessionService _sessionService = sessionService;
         /// <summary>
         /// Retrieves the profile information of the currently authenticated user.
         /// </summary>
@@ -260,6 +264,57 @@ namespace API.Controllers
         {
             var result = await _userProfileService.GetMyDriverLicenseAsync(id);
             return Ok(result);
+        }
+
+        [HttpGet("citizen-identity/image-url")]
+        [Authorize]
+        public async Task<IActionResult> GetCitizenIdImageUrl()
+        {
+            var userId = User.GetUserId();
+
+            var citizen = await _citizenIdentityService.GetByUserId(userId)
+                ?? throw new NotFoundException("Citizen identity not found");
+
+            // TTL 5 phút (300s)
+            var frontUrl = _photoService.GetSignedUrl(citizen.FrontImagePublicId, 300);
+            var backUrl = _photoService.GetSignedUrl(citizen.BackImagePublicId, 300);
+
+            // Bắt đầu phiên xem ảnh 5 phút
+            _sessionService.StartSession(userId, citizen.FrontImagePublicId, citizen.BackImagePublicId);
+
+            return Ok(new
+            {
+                frontImageUrl = frontUrl,
+                backImageUrl = backUrl,
+                expiresAt = DateTimeOffset.UtcNow.AddMinutes(5)
+            });
+        }
+
+        [HttpPost("citizen-identity/refresh")]
+        [Authorize]
+        public IActionResult RefreshCitizenIdentityImages()
+        {
+            var userId = User.GetUserId();
+
+            if (!_sessionService.IsSessionActive(userId))
+                return BadRequest(new { message = "Session expired" });
+
+            var ids = _sessionService.GetImageIds(userId);
+            if (ids is null)
+                return NotFound(new { message = "No active session" });
+
+            // Gia hạn phiên 5 phút
+            _sessionService.ExtendSession(userId);
+
+            var frontUrl = _photoService.GetSignedUrl(ids.Value.front, 300);
+            var backUrl = _photoService.GetSignedUrl(ids.Value.back, 300);
+
+            return Ok(new
+            {
+                frontImageUrl = frontUrl,
+                backImageUrl = backUrl,
+                expiresAt = DateTimeOffset.UtcNow.AddMinutes(5)
+            });
         }
     }
 }

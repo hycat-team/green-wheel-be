@@ -1,10 +1,11 @@
-﻿using Domain.Entities;
+﻿using Application.Dtos.CitizenIdentity.Response;
+using Domain.Entities;
 
 namespace Application.Abstractions
 {
     public interface ICitizenIdentityService
     {
-        Task<CitizenIdentity?> ProcessCitizenIdentityAsync(Guid userId,
+        Task<CitizenIdentityRes?> ProcessCitizenIdentityAsync(Guid userId,
             string frontImageUrl, string frontPublicId, string backImageUrl, string backPublicId);
 
         Task<CitizenIdentity> AddAsync(CitizenIdentity identity);
@@ -15,7 +16,7 @@ namespace Application.Abstractions
 
         Task<CitizenIdentity?> GetByIdAsync(Guid id);
 
-        Task<CitizenIdentity?> GetByUserId(Guid userId);
+        Task<CitizenIdentityRes?> GetByUserId(Guid userId);
 
         Task<CitizenIdentity?> GetByIdentityNumberAsync(string identityNumber);
         Task<string> VerifyDocumentTypeAsync(string imageUrl);

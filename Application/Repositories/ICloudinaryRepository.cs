@@ -8,5 +8,6 @@ namespace Application.Repositories
         Task<PhotoUploadResult> UploadAsync(UploadImageReq file, string folder);
 
         Task<bool> DeleteAsync(string publicId);
+        string GenerateSignedUrl(string publicId, int expireInSeconds = 300);
     }
 }

@@ -1,10 +1,11 @@
-﻿using Domain.Entities;
+﻿using Application.Dtos.DriverLicense.Response;
+using Domain.Entities;
 
 namespace Application.Abstractions
 {
     public interface IDriverLicenseService
     {
-        Task<DriverLicense?> ProcessDriverLicenseAsync(Guid userId,
+        Task<DriverLicenseRes?> ProcessDriverLicenseAsync(Guid userId,
             string frontImageUrl, string frontPublicId, string backImageUrl, string backPublicId);
 
         Task<DriverLicense?> AddAsync(DriverLicense license);
@@ -13,7 +14,7 @@ namespace Application.Abstractions
 
         Task<bool> DeleteAsync(Guid userId, string publicId);
 
-        Task<DriverLicense?> GetByUserIdAsync(Guid userId);
+        Task<DriverLicenseRes?> GetByUserIdAsync(Guid userId);
 
         Task<DriverLicense?> GetAsync(Guid id);
 
