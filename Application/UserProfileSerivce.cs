@@ -311,7 +311,23 @@ namespace Application
                 entity.DateOfBirth = req.DateOfBirth.Value;
             }
             if (req.ExpiresAt.HasValue) entity.ExpiresAt = req.ExpiresAt.Value;
+            var existingLicense = await _driverLicenseRepository.GetByUserIdAsync(userId);
+            if (existingLicense != null)
+            {
+                // Lấy giá trị final sau update
+                var finalName = !string.IsNullOrWhiteSpace(req.FullName)
+                    ? req.FullName.Trim()
+                    : entity.FullName;
 
+                var finalDob = req.DateOfBirth ?? entity.DateOfBirth;
+
+                LisenceHelper.EnsureMatch(
+                    finalName,
+                    (DateTimeOffset)finalDob,
+                    existingLicense.FullName ?? "",
+                    existingLicense.DateOfBirth
+                );
+            }
             entity.UpdatedAt = DateTimeOffset.UtcNow;
 
             await _citizenIdentityRepository.UpdateAsync(entity);
@@ -348,7 +364,22 @@ namespace Application
                 entity.DateOfBirth = req.DateOfBirth.Value;
             }
             if (req.ExpiresAt.HasValue) entity.ExpiresAt = req.ExpiresAt.Value;
+            var existingCccd = await _citizenIdentityRepository.GetByUserIdAsync(userId);
+            if (existingCccd != null)
+            {
+                var finalName = !string.IsNullOrWhiteSpace(req.FullName)
+                    ? req.FullName.Trim()
+                    : entity.FullName;
 
+                var finalDob = req.DateOfBirth ?? entity.DateOfBirth;
+
+                LisenceHelper.EnsureMatch(
+                    finalName,
+                    (DateTimeOffset)finalDob,
+                    existingCccd.FullName ?? "",
+                    existingCccd.DateOfBirth
+                );
+            }
             entity.UpdatedAt = DateTimeOffset.UtcNow;
 
             await _driverLicenseRepository.UpdateAsync(entity);

@@ -78,16 +78,16 @@ namespace Application
                 BackImagePublicId=backPublicId,
                 UpdatedAt = DateTimeOffset.UtcNow
             };
-            var existingLicense = await _licenseRepo.GetByUserIdAsync(userId);
-            if (existingLicense != null)
-            {
-                LisenceHelper.EnsureMatch(
-                    entity.FullName,
-                    entity.DateOfBirth,
-                    existingLicense.FullName ?? "",
-                    existingLicense.DateOfBirth
-                );
-            }
+            //var existingLicense = await _licenseRepo.GetByUserIdAsync(userId);
+            //if (existingLicense != null)
+            //{
+            //    LisenceHelper.EnsureMatch(
+            //        entity.FullName,
+            //        entity.DateOfBirth,
+            //        existingLicense.FullName ?? "",
+            //        existingLicense.DateOfBirth
+            //    );
+            //}
             var existing = await _citizenRepo.GetByUserIdAsync(userId);
             if (existing != null)
             {
