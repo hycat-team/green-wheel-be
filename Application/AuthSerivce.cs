@@ -28,7 +28,7 @@ namespace Application
         private readonly JwtSettings _jwtSettings;
         private readonly OTPSettings _otpSettings;
         private readonly IOTPRepository _otpRepository;
-        private readonly IJwtBlackListRepository _jwtBackListRepository;
+        private readonly IJwtBlackListRepository _jwtBlackListRepository;
 
         public AuthSerivce(IUserRepository repository,
             IOptions<JwtSettings> jwtSettings,
@@ -45,7 +45,7 @@ namespace Application
             _userRepository = repository;
             _refreshTokenRepository = refreshTokenRepository;
             _otpRepository = otpRepository;
-            _jwtBackListRepository = jwtBackListRepository;
+            _jwtBlackListRepository = jwtBackListRepository;
             _emailService = emailSerivce;
             _jwtSettings = jwtSettings.Value;
             _contextAccessor = httpContextAccessor;
@@ -250,7 +250,7 @@ namespace Application
                 throw new ConflictDuplicateException(Message.UserMessage.PhoneAlreadyExist);
             }
             //----check in black list
-            if (await _jwtBackListRepository.CheckTokenInBlackList(token))
+            if (await _jwtBlackListRepository.CheckTokenInBlackList(token))
             {
                 throw new UnauthorizedAccessException(Message.UserMessage.Unauthorized);
             }
@@ -259,7 +259,6 @@ namespace Application
             var claims = JwtHelper.VerifyToken(token, _jwtSettings.RegisterTokenSecret,
                 TokenType.RegisterToken.ToString(), _jwtSettings.Issuer, _jwtSettings.Audience);
 
-            //var email = claims.FindFirst(JwtRegisteredClaimNames.Sid).Value.ToString();
             var sidClaim = claims.FindFirst(JwtRegisteredClaimNames.Sid);
             if (sidClaim == null || string.IsNullOrEmpty(sidClaim.Value))
             {
@@ -285,11 +284,7 @@ namespace Application
             user.Email = email;
             //user.RoleId = roles.FirstOrDefault(r => r.Name == RoleName.Customer).Id;
             var customerRole = roles?.FirstOrDefault(r => r.Name == RoleName.Customer);
-            if (customerRole == null)
-            {
-                throw new InvalidOperationException("Customer role not found in roles cache.");
-            }
-            user.RoleId = customerRole.Id;
+            user.RoleId = customerRole!.Id;
             user.DeletedAt = null;
             Guid userId = await _userRepository.AddAsync(user);
             string accesstoken = GenerateAccessToken(userId);
@@ -303,7 +298,7 @@ namespace Application
             {
                 long.TryParse(expClaim.Value, out expSeconds);
             }
-            await _jwtBackListRepository.SaveTokenAsyns(token, expSeconds);
+            await _jwtBlackListRepository.SaveTokenAsyns(token, expSeconds);
 
             return accesstoken;
         }
@@ -360,7 +355,7 @@ namespace Application
         public async Task ResetPassword(string forgotPasswordToken, string password)
         {
             //----check in black list
-            if (await _jwtBackListRepository.CheckTokenInBlackList(forgotPasswordToken))
+            if (await _jwtBlackListRepository.CheckTokenInBlackList(forgotPasswordToken))
             {
                 throw new UnauthorizedAccessException(Message.UserMessage.Unauthorized);
             }
@@ -386,7 +381,7 @@ namespace Application
             {
                 long.TryParse(expClaim.Value, out expSeconds);
             }
-            await _jwtBackListRepository.SaveTokenAsyns(forgotPasswordToken, expSeconds);
+            await _jwtBlackListRepository.SaveTokenAsyns(forgotPasswordToken, expSeconds);
         }
 
         /*
@@ -449,10 +444,6 @@ namespace Application
                     id = Guid.NewGuid();
                 } while (await _userRepository.GetByIdAsync(id) != null);
                 var roles = _cache.Get<List<Role>>(Common.SystemCache.AllRoles);
-                if (roles == null)
-                {
-                    throw new InvalidOperationException("Roles cache is not initialized.");
-                }
                 user = new User
                 {
                     Id = id,

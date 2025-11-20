@@ -12,12 +12,11 @@ namespace Infrastructure.Repositories
 {
     public class VehicleModelRepository : GenericRepository<VehicleModel>, IVehicleModelRepository
     {
-        private readonly IMapper _mapper;
+
         private readonly IMemoryCache _cache;
 
-        public VehicleModelRepository(IGreenWheelDbContext dbContext, IMapper mapper, IMemoryCache cache) : base(dbContext)
+        public VehicleModelRepository(IGreenWheelDbContext dbContext, IMemoryCache cache) : base(dbContext)
         {
-            _mapper = mapper;
             _cache = cache;
         }
         public async Task<IEnumerable<VehicleModel>> GetAllAsync(string? name, Guid? segmentId)
@@ -135,7 +134,7 @@ namespace Infrastructure.Repositories
                 return true;
 
             bool overlap = flagContracts.Any(rc =>
-                startBuffer <= rc.EndDate && endBuffer >= rc.StartDate
+                (startBuffer <= rc.EndDate && endBuffer >= rc.StartDate)
             );
             return !overlap;
         }

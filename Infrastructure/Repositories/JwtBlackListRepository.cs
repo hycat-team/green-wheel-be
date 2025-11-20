@@ -25,7 +25,7 @@ namespace Infrastructure.Repositories
         public async Task SaveTokenAsyns(string key, long ttl)
         {
             DateTimeOffset tokenExpiredTime = DateTimeOffset.FromUnixTimeSeconds(ttl);
-            TimeSpan timeToLive =  tokenExpiredTime- DateTimeOffset.UtcNow ;
+            TimeSpan timeToLive = tokenExpiredTime - DateTimeOffset.UtcNow;
             int seconds = (int)timeToLive.TotalSeconds;
             if(seconds > 0)
             {

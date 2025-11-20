@@ -2,6 +2,7 @@
 using Application.Constants;
 using Application.Dtos.User.Request;
 using Application.Dtos.User.Respone;
+using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -225,12 +226,8 @@ namespace API.Controllers
             {
                 needSetPassword = false;
             }
-            return Ok(new LoginGoogleRes
-            {
-                NeedSetPassword = needSetPassword,
-                AccessToken = token,
-                FirstName = payload.GivenName,
-                LastName = payload.FamilyName
+            return Ok( new {
+                AccessToken = token
             });
         }
 

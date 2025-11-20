@@ -435,8 +435,15 @@ INSERT INTO users (first_name,last_name,email,password,phone,sex,role_id) VALUES
 (N'Huy',N'Free 3','Huytradecoin@gmail.com',
 '$2a$12$EF0KCPRK/mIt16yJtjCL1u/R5K0NXE7Mu9Q0s1WLX.iNOVrNEtXYe','0903000013',0,@customerRole2);
 GO
+DECLARE @u UNIQUEIDENTIFIER = (SELECT id FROM users WHERE email='Huytradecoin@gmail.com');
+INSERT INTO citizen_identities (number, full_name, nationality, sex, date_of_birth, expires_at, front_image_url, front_image_public_id, back_image_url, back_image_public_id, user_id)
+VALUES ('019199887766', N'Phạm Thị Diệu Thu', N'Việt Nam', 1, '2004-01-01T00:00:00+00:00', '2030-01-07T00:00:00+00:00', 'http://res.cloudinary.com/dsnnghkez/image/upload/v1763651082/citizen-ids-front/mxoxxmampq83dzauec1m.jpg'
+, 'citizen-ids-front/mxoxxmampq83dzauec1m', 'http://res.cloudinary.com/dsnnghkez/image/upload/v1763651084/citizen-ids-back/fsryrk9jblhf8bvayyan.jpg', 'citizen-ids-back/fsryrk9jblhf8bvayyan', @u);
 
-
+INSERT INTO driver_licenses (number, class, full_name, nationality, sex, date_of_birth, expires_at, front_image_url, front_image_public_id, back_image_url, back_image_public_id, user_id)
+VALUES ('011859806M', 1, N'Nguyễn Hoàng Minh Nguyệt', N'Việt Nam', 1, '2004-10-29T00:00:00+00:00', '2015-09-28T00:00:00+00:00', 'http://res.cloudinary.com/dsnnghkez/image/upload/v1763651104/driver-license-front/bijuyhg1nmgv20jfg6om.jpg'
+, 'driver-license-front/bijuyhg1nmgv20jfg6om', 'http://res.cloudinary.com/dsnnghkez/image/upload/v1763651108/driver-license-back/iutqovdh8hljw2ddxs6q.jpg', 'driver-license-back/iutqovdh8hljw2ddxs6q', @u);
+Go
 /* ============================================================
    SECTION 17 — COMPLETED CONTRACTS FOR JAN–NOV 2025 (FINAL WITH INVOICE ITEMS)
 ============================================================ */
@@ -689,10 +696,10 @@ INSERT INTO rental_contracts
  vehicle_id,customer_id,handover_staff_id,station_id)
 VALUES
 (@cA1,'PP VF3 U1',
- '2025-11-03T00:00:00+07:00','2025-11-10T00:00:00+07:00',
+ '2025-11-20T00:00:00+07:00','2025-12-1T00:00:00+07:00',
  1,0,0,@vVF3,@u1,@staff,@sA),
 (@cA2,'PP VF3 U2',
- '2025-11-03T00:00:00+07:00','2025-11-10T00:00:00+07:00',
+ '2025-11-20T00:00:00+07:00','2025-12-1T00:00:00+07:00',
  1,0,0,@vVF3,@u2,@staff,@sA);
 
 EXEC dbo.__seed_create_invoices @cA1,0,0;
@@ -707,10 +714,10 @@ INSERT INTO rental_contracts
  vehicle_id,customer_id,handover_staff_id,station_id,actual_start_date)
 VALUES
 (@cB1,'Active VF5 U3',
- '2025-11-01T00:00:00+07:00','2025-11-04T11:00:00+07:00',
+ '2025-11-01T00:00:00+07:00','2025-11-20T11:00:00+07:00',
  2,1,1,@vVF5,@u3,@staff,@sA,'2025-11-01T00:00:00+07:00'),
 (@cB2,'PP VF5 U4',
- '2025-11-15T00:00:00+07:00','2025-11-17T00:00:00+07:00',
+ '2025-12-01T00:00:00+07:00','2025-12-03T00:00:00+07:00',
  1,0,0,@vVF5,@u4,@staff,@sA,NULL);
 
 EXEC dbo.__seed_create_invoices @cB1,1,1;
@@ -728,10 +735,10 @@ INSERT INTO rental_contracts
  vehicle_id,customer_id,handover_staff_id,station_id,actual_start_date)
 VALUES
 (@cC1,'Active VF6 U5',
- '2025-11-01T00:00:00+07:00','2025-11-04T11:00:00+07:00',
+ '2025-11-01T00:00:00+07:00','2025-11-20T11:00:00+07:00',
  2,1,1,@vVF6,@u5,@staff,@sA,'2025-11-01T00:00:00+07:00'),
 (@cC2,'Active VF6 U6',
- '2025-11-15T00:00:00+07:00','2025-11-17T00:00:00+07:00',
+ '2025-12-01T00:00:00+07:00','2025-12-03T00:00:00+07:00',
  2,1,1,@vVF6,@u6,@staff,@sA,'2025-11-15T00:00:00+07:00');
 
 EXEC dbo.__seed_create_invoices @cC1,1,1;
@@ -749,10 +756,10 @@ INSERT INTO rental_contracts
  vehicle_id,customer_id,handover_staff_id,station_id,actual_start_date)
 VALUES
 (@cD1,'Active VF8 U7',
- '2025-11-01T00:00:00+07:00','2025-11-04T11:00:00+07:00',
+ '2025-11-01T00:00:00+07:00','2025-11-20T11:00:00+07:00',
  2,1,1,@vVF8,@u7,@staff,@sA,'2025-11-01T00:00:00+07:00'),
 (@cD2,'Active VF8 U8',
- '2025-11-15T00:00:00+07:00','2025-11-17T00:00:00+07:00',
+ '2025-12-01T00:00:00+07:00','2025-12-03T00:00:00+07:00',
  2,1,1,@vVF8,@u8,@staff,@sA,'2025-11-15T00:00:00+07:00');
 
 EXEC dbo.__seed_create_invoices @cD1,1,1;

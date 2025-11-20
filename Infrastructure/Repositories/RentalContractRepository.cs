@@ -78,6 +78,8 @@ namespace Infrastructure.Repositories
         {
             return await (_dbContext.RentalContracts.Where(r => r.CustomerId == customerId
             && r.Status != (int)RentalContractStatus.Completed
+            && r.Status != (int)RentalContractStatus.RefundPending
+            && r.Status != (int)RentalContractStatus.Returned
             && r.Status != (int)RentalContractStatus.Cancelled).FirstOrDefaultAsync()) != null;
         }
 

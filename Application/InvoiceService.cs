@@ -57,7 +57,11 @@ namespace Application
                 var amountNeed = InvoiceHelper.CalculateTotalAmount(invoice)
                                   - (reservationInvoice != null ? reservationInvoice.Status == (int)InvoiceStatus.Paid ? reservationInvoice.Subtotal : 0 : 0);
                 if (amount < amountNeed) throw new BusinessException(Message.InvoiceMessage.InvalidAmount);
-                await UpdateCashInvoice(invoice, amount);
+                await UpdateAsync(invoice.Id, new UpdateInvoiceReq()
+                {
+                    PaymentMethod = (int)PaymentMethod.Cash,
+                    Amount = amount,
+                });
                 await CancleReservationInvoice(invoice);
                 contract.Status = (int)RentalContractStatus.Active;
                 await _uow.RentalContractRepository.UpdateAsync(contract);
@@ -112,7 +116,11 @@ namespace Application
         {
             var amountNeed = InvoiceHelper.CalculateTotalAmount(invoice);
             if (amount < amountNeed) throw new BusinessException(Message.InvoiceMessage.InvalidAmount);
-            await UpdateCashInvoice(invoice, amount);
+            await UpdateAsync(invoice.Id, new UpdateInvoiceReq()
+            {
+                PaymentMethod = (int)PaymentMethod.Cash,
+                Amount = amount,
+            });
             await _uow.SaveChangesAsync();
         }
 
@@ -125,13 +133,17 @@ namespace Application
                 ?? throw new NotFoundException(Message.RentalContractMessage.NotFound);
                 var amountNeed = InvoiceHelper.CalculateTotalAmount(invoice);
                 if (amount < amountNeed) throw new BusinessException(Message.InvoiceMessage.InvalidAmount);
-                await UpdateCashInvoice(invoice, amount);
+                await UpdateAsync(invoice.Id, new UpdateInvoiceReq()
+                {
+                    PaymentMethod = (int)PaymentMethod.Cash,
+                    Amount = amount,
+                });
                 contract.Status = (int)RentalContractStatus.Active;
                 await _uow.RentalContractRepository.UpdateAsync(contract);
                 await _uow.SaveChangesAsync();
                 await _uow.CommitAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await _uow.RollbackAsync();
                 throw;
@@ -152,7 +164,10 @@ namespace Application
                 var amountNeed = InvoiceHelper.CalculateTotalAmount(invoice);
                 if (amountNeed > 0 && amount < amountNeed)
                     throw new BusinessException(Message.InvoiceMessage.InvalidAmount);
-                await UpdateCashInvoice(invoice, amount);
+                await UpdateAsync(invoice.Id, new UpdateInvoiceReq() {
+                    PaymentMethod = (int)PaymentMethod.Cash,
+                    Amount = amount,
+                });
 
                 await _uow.SaveChangesAsync();
                 await _uow.CommitAsync();
@@ -164,15 +179,15 @@ namespace Application
             }
         }
 
-        private async Task UpdateCashInvoice(Invoice invoice, decimal amount)
-        {
-            invoice.PaidAmount = amount;
-            invoice.PaidAt = DateTimeOffset.UtcNow;
-            invoice.Status = (int)InvoiceStatus.Paid;
-            invoice.PaymentMethod = (int)PaymentMethod.Cash;
-            await _uow.InvoiceRepository.UpdateAsync(invoice);
-            await _uow.SaveChangesAsync();
-        }
+        //private async Task UpdateCashInvoice(Invoice invoice, decimal amount)
+        //{
+        //    invoice.PaidAmount = amount;
+        //    invoice.PaidAt = DateTimeOffset.UtcNow;
+        //    invoice.Status = (int)InvoiceStatus.Paid;
+        //    invoice.PaymentMethod = (int)PaymentMethod.Cash;
+        //    await _uow.InvoiceRepository.UpdateAsync(invoice);
+        //    await _uow.SaveChangesAsync();
+        //}
 
         public async Task UpdateAsync(Guid invoiceId, UpdateInvoiceReq req)
         {
@@ -354,7 +369,7 @@ namespace Application
                     Id = invoiceId,
                     ContractId = req.ContractId,
                     Status = (int)InvoiceStatus.Pending,
-                    Tax = Common.Tax.NoneVAT, //10% dạng decimal
+                    Tax = Common.Tax.NoneVAT,
                     Notes = $"GreenWheel – Invoice for your order {req.ContractId}",
                     Type = req.Type
                 };
