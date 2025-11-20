@@ -75,6 +75,10 @@ namespace Application.Constants
             public const string CitizenIdentityDuplicate = "user.citizen_identity_duplicate";
             public const string InvalidCitizenIdentityImagesAmount = "user.invalid_citizen_identity_images_amount";
             public const string InvalidCitizenIdDocumentType = "user.invalid_citizen_id_document_type";
+            public const string InvalidNameOnOtherPaper = "user.invalid_paper_name_on_other_document";
+            public const string InvalidDateOnOtherPaper = "user.invalid_paper_date_on_other_document";
+            
+
 
             //Driver License
 

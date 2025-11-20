@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Application.AppExceptions;
+using Application.Constants;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,6 +29,28 @@ namespace Application.Helpers
                 "DE" => 12,
                 _ => -1 // unknown
             };
+        }
+        public static void EnsureMatch(string nameA, DateTimeOffset dobA,
+                                   string nameB, DateTimeOffset dobB)
+        {
+            // normalize
+            var nA = Normalize(nameA);
+            var nB = Normalize(nameB);
+
+            if (!string.Equals(nA, nB, StringComparison.OrdinalIgnoreCase))
+                throw new BusinessException(Message.UserMessage.InvalidNameOnOtherPaper);
+
+            if (dobA.Date != dobB.Date)
+                throw new BusinessException(Message.UserMessage.InvalidDateOnOtherPaper);
+        }
+
+        private static string Normalize(string? fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName)) return "";
+            var parts = fullName.Trim().ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < parts.Length; i++)
+                parts[i] = char.ToUpper(parts[i][0]) + parts[i].Substring(1);
+            return string.Join(' ', parts);
         }
     }
 }

@@ -13,15 +13,18 @@ namespace Application
         private readonly IGeminiService _geminiService;
         private readonly ICitizenIdentityRepository _citizenRepo;
         private readonly IPhotoService _photoService;
+        private readonly IDriverLicenseRepository _licenseRepo;
 
         public CitizenIdentityService(
             IGeminiService geminiService,
             ICitizenIdentityRepository citizenRepo,
-            IPhotoService photoService)
+            IPhotoService photoService,
+            IDriverLicenseRepository licenseRepo)
         {
             _geminiService = geminiService;
             _citizenRepo = citizenRepo;
             _photoService = photoService;
+            _licenseRepo = licenseRepo;
         }
 
         public async Task<CitizenIdentity> AddAsync(CitizenIdentity identity)
@@ -75,6 +78,16 @@ namespace Application
                 BackImagePublicId=backPublicId,
                 UpdatedAt = DateTimeOffset.UtcNow
             };
+            var existingLicense = await _licenseRepo.GetByUserIdAsync(userId);
+            if (existingLicense != null)
+            {
+                LisenceHelper.EnsureMatch(
+                    entity.FullName,
+                    entity.DateOfBirth,
+                    existingLicense.FullName ?? "",
+                    existingLicense.DateOfBirth
+                );
+            }
             var existing = await _citizenRepo.GetByUserIdAsync(userId);
             if (existing != null)
             {
