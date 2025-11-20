@@ -34,6 +34,7 @@ public partial class User : SorfDeletedEntity, IEntity
 
     public Guid RoleId { get; set; }
 
+    public bool HasSeenTutorial { get; set; } = false;
     public virtual CitizenIdentity? CitizenIdentity { get; set; }
 
     public virtual DriverLicense? DriverLicense { get; set; }

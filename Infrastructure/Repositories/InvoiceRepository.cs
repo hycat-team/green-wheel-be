@@ -1,11 +1,12 @@
-﻿using Application.Dtos.Common.Request;
+﻿using Application.Constants;
+using Application.Dtos.Common.Request;
 using Application.Dtos.Common.Response;
+using Application.Helpers;
 using Application.Repositories;
 using Domain.Entities;
 using Infrastructure.ApplicationDbContext;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
-using Application.Helpers;
 
 namespace Infrastructure.Repositories
 {
@@ -30,6 +31,7 @@ namespace Infrastructure.Repositories
             }
             return invoices;
         }
+
         public async Task<IEnumerable<Invoice>> GetByContractAsync(Guid ContractId)
         {
             return await _dbContext.Invoices.Where(i => i.ContractId == ContractId).ToListAsync();
@@ -55,9 +57,11 @@ namespace Infrastructure.Repositories
             return await query.FirstOrDefaultAsync(i => i.Id == id);
         }
 
-        public async Task<PageResult<Invoice>> GetAllInvoicesAsync(PaginationParams pagination)
+        public async Task<PageResult<Invoice>> GetAllWithPaginationAsync(PaginationParams pagination)
         {
             var query = _dbContext.Invoices
+                .Include(i => i.Contract)
+                .Include(i => i.InvoiceItems)
                 .AsNoTracking()
                 .OrderByDescending(i => i.CreatedAt);
 
@@ -68,6 +72,36 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
 
             return new PageResult<Invoice>(items, pagination.PageNumber, pagination.PageSize, totalCount);
+        }
+
+        public async Task<IEnumerable<Invoice>> GetRefundInvoiceWarningAsync()
+        {
+            return await _dbContext.Invoices.Where(r => r.Type == (int)InvoiceType.Refund
+                                                && r.Status == (int)InvoiceStatus.Pending
+                                                && InvoiceHelper.CalculateTotalAmount(r) > 0
+                                                && (DateTimeOffset.UtcNow - r.CreatedAt).TotalDays >= 7)
+                                                    .Include(r => r.Contract)
+                                                        .ThenInclude(c => c.Customer)
+                                                    .Include(r => r.Contract)
+                                                        .ThenInclude(c => c.Station)
+                                                    .ToArrayAsync();
+        }
+
+        public async Task<IEnumerable<Invoice>> GetAllInvoicesAsync(Guid? stationId)
+        {
+            var query = _dbContext.Invoices
+                .Include(i => i.Contract)
+                .Include(i => i.InvoiceItems)
+                .AsNoTracking()
+                .OrderByDescending(i => i.CreatedAt)
+                .AsQueryable();
+
+            if (stationId != null)
+            {
+                query = query.Where(i => i.Contract.StationId == stationId);
+            }
+
+            return await query.ToListAsync();
         }
     }
 }

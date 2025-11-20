@@ -14,5 +14,6 @@ namespace Application.Dtos.User.Request
         public int? Sex { get; set; }
         public DateTimeOffset? DateOfBirth { get; set; }
         public string? AvatarUrl { get; set; }
+        public bool? HasSeenTutorial { get; set; }
     }
 }

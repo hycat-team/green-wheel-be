@@ -3,7 +3,7 @@ name: Build & Deploy to Azure Container Apps
 on:
   push:
     branches:
-      - main
+      - feat/deploy
   workflow_dispatch:
 
 permissions:

@@ -1,6 +1,7 @@
 ﻿using Application.Constants;
 using Application.Dtos.Common.Request;
 using Application.Dtos.Common.Response;
+using Application.Dtos.RentalContract.Respone;
 using Application.Repositories;
 using Domain.Entities;
 using Infrastructure.ApplicationDbContext;
@@ -66,7 +67,7 @@ namespace Infrastructure.Repositories
             {
                 rentalContracts = rentalContracts.Where(rc => rc.Customer.DriverLicense!.Number == driverLicenseNumber);
             }
-            if(stationId != null)
+            if (stationId != null)
             {
                 rentalContracts = rentalContracts.Where(rc => rc.StationId == stationId);
             }
@@ -107,7 +108,6 @@ namespace Infrastructure.Repositories
             var vehicleChecklist = (await _dbContext.VehicleChecklists.Where(vc => vc.Id == id)
                 .Include(vc => vc.Contract)
                     .ThenInclude(r => r == null ? null : r.Invoices).OrderBy(x => x.CreatedAt).FirstOrDefaultAsync());
-                
 
             return vehicleChecklist == null ? null : vehicleChecklist.Contract;
         }
@@ -171,6 +171,27 @@ namespace Infrastructure.Repositories
                 total
             );
         }
+
+        public async Task<IEnumerable<RentalContract?>> GetAllRentalContractsAsync(Guid? stationId)
+        {
+            var query = _dbContext.RentalContracts
+                .Include(x => x.Vehicle).ThenInclude(v => v == null ? null : v.Model)
+                .Include(x => x.Station)
+                .Include(x => x.HandoverStaff).ThenInclude(h => h == null ? null : h.User)
+                .Include(x => x.ReturnStaff).ThenInclude(h => h == null ? null : h.User)
+                .Include(x => x.Customer).ThenInclude(u => u.CitizenIdentity)
+                .Include(x => x.Customer).ThenInclude(u => u.DriverLicense)
+                .OrderByDescending(x => x.CreatedAt)
+                .AsQueryable();
+
+            if (stationId != null)
+            {
+                query = query.Where(rc => rc.StationId == stationId);
+            }
+
+            return await query.ToListAsync();
+        }
+
         public async Task<PageResult<RentalContract>> GetMyContractsAsync(
             Guid customerId, PaginationParams pagination,
             int? status, Guid? stationId = null)
@@ -229,5 +250,26 @@ namespace Infrastructure.Repositories
                                                     .ToArrayAsync();
         }
 
+        public async Task<IEnumerable<BestRentedModel>> GetBestRentedModelsAsync(int months, int limit)
+        {
+            var fromDate = DateTimeOffset.UtcNow.AddMonths(-months);
+
+            var query =
+                from vm in _dbContext.VehicleModels
+                join v in _dbContext.Vehicles on vm.Id equals v.ModelId
+                join rc in _dbContext.RentalContracts on v.Id equals rc.VehicleId
+                where rc.StartDate >= fromDate
+                      && rc.DeletedAt == null
+                group rc by new { vm.Id, vm.Name } into g
+                orderby g.Count() descending
+                select new BestRentedModel
+                {
+                    ModelId = g.Key.Id,
+                    ModelName = g.Key.Name,
+                    RentedCount = g.Count()
+                };
+
+            return await query.Take(limit).ToListAsync();
+        }
     }
 }

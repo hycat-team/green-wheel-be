@@ -152,7 +152,7 @@ namespace Application
                 return (int)value;
             }
 
-            throw new BadRequestException($"Invalid license class: {classString}");
+            throw new BadRequestException(Message.UserMessage.InvalidDriverLicenseData);
         }
 
         public async Task<string> VerifyDocumentTypeAsync(string imageUrl)

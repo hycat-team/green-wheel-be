@@ -11,14 +11,9 @@ namespace API.Controllers
     /// </summary>
     [ApiController]
     [Route("api/brands")]
-    public class BrandsController : ControllerBase
+    public class BrandsController(IBrandService brandService) : ControllerBase
     {
-        private readonly IBrandService _brandService;
-
-        public BrandsController(IBrandService brandService)
-        {
-            _brandService = brandService;
-        }
+        private readonly IBrandService _brandService = brandService;
 
         /// <summary>
         /// Retrieves all vehicle brands in the system (admin or staff only).
@@ -27,7 +22,6 @@ namespace API.Controllers
         /// <response code="200">Success.</response>
         /// <response code="401">Unauthorized — user is not authenticated.</response>
         /// <response code="403">Forbidden — user does not have permission.</response>
-        [RoleAuthorize(RoleName.Staff, RoleName.Admin)]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -44,7 +38,6 @@ namespace API.Controllers
         /// <response code="401">Unauthorized — user is not authenticated.</response>
         /// <response code="403">Forbidden — user does not have permission.</response>
         /// <response code="404">Brand not found.</response>
-        [RoleAuthorize(RoleName.Staff, RoleName.Admin)]
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -61,8 +54,8 @@ namespace API.Controllers
         /// <response code="400">Invalid brand data.</response>
         /// <response code="401">Unauthorized — user is not authenticated.</response>
         /// <response code="403">Forbidden — user does not have permission.</response>
-        [RoleAuthorize(RoleName.Admin)]
         [HttpPost]
+        [RoleAuthorize(RoleName.SuperAdmin)]
         public async Task<IActionResult> Create([FromBody] BrandReq dto)
         {
             var created = await _brandService.CreateAsync(dto);
@@ -80,8 +73,8 @@ namespace API.Controllers
         /// <response code="401">Unauthorized — user is not authenticated.</response>
         /// <response code="403">Forbidden — user does not have permission.</response>
         /// <response code="404">Brand not found.</response>
-        [RoleAuthorize(RoleName.Admin)]
         [HttpPut("{id:guid}")]
+        [RoleAuthorize(RoleName.SuperAdmin)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBrandReq dto)
         {
             var updated = await _brandService.UpdateAsync(id, dto);
@@ -97,8 +90,8 @@ namespace API.Controllers
         /// <response code="401">Unauthorized — user is not authenticated.</response>
         /// <response code="403">Forbidden — user does not have permission.</response>
         /// <response code="404">Brand not found.</response>
-        [RoleAuthorize(RoleName.Admin)]
         [HttpDelete("{id:guid}")]
+        [RoleAuthorize(RoleName.SuperAdmin)]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _brandService.DeleteAsync(id);

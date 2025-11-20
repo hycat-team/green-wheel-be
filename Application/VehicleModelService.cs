@@ -2,6 +2,7 @@
 using Application.AppExceptions;
 using Application.Constants;
 using Application.Dtos.Common.Request;
+using Application.Dtos.RentalContract.Respone;
 using Application.Dtos.VehicleModel.Request;
 using Application.Dtos.VehicleModel.Respone;
 using Application.Repositories;
@@ -21,9 +22,10 @@ namespace Application
         private readonly IVehicleModelUow _vehicleModelUow;
         private readonly IVehicleSegmentRepository _vehicleSegmentRepository;
         private readonly IBrandRepository _branchRepository;
+        private readonly IRentalContractRepository _rentalContractRepository;
 
         public VehicleModelService(IVehicleModelRepository vehicleModelRepository, IMapper mapper, IMediaUow uow,
-            IPhotoService photoService, IVehicleModelUow vehicleModelUow, IVehicleSegmentRepository vehicleSegmentRepository, IBrandRepository branchRepository)
+            IPhotoService photoService, IVehicleModelUow vehicleModelUow, IVehicleSegmentRepository vehicleSegmentRepository, IBrandRepository branchRepository, IRentalContractRepository rentalContractRepository)
         {
             _vehicleModelRepository = vehicleModelRepository;
             _mapper = mapper;
@@ -32,6 +34,7 @@ namespace Application
             _vehicleModelUow = vehicleModelUow;
             _vehicleSegmentRepository = vehicleSegmentRepository;
             _branchRepository = branchRepository;
+            _rentalContractRepository = rentalContractRepository;
         }
 
         public async Task<Guid> CreateVehicleModelAsync(CreateVehicleModelReq req)
@@ -73,9 +76,9 @@ namespace Application
             }
         }
 
-        public async Task<bool> DeleteVehicleModleAsync(Guid id)
+        public async Task DeleteVehicleModleAsync(Guid id)
         {
-            return await _vehicleModelRepository.DeleteAsync(id);
+            await _vehicleModelRepository.DeleteAsync(id);
         }
 
         public async Task<IEnumerable<VehicleModelViewRes>> SearchVehicleModel(VehicleFilterReq vehicleFilterReq)
@@ -211,13 +214,25 @@ namespace Application
         {
             var vehicleModels = await _vehicleModelRepository.GetAllAsync(null, null);
             IEnumerable<string> imageUrls = [];
-            if (vehicleModels != null || vehicleModels.Any())
+            if (vehicleModels != null && vehicleModels.Any())
             {
                 imageUrls = vehicleModels
                     .Where(vm => !string.IsNullOrEmpty(vm.ImageUrl))
                     .Select(vm => vm.ImageUrl!);
             }
             return imageUrls;
+        }
+
+        public async Task<IEnumerable<BestRentedModel>> GetBestRentedModelsAsync(int months, int limit)
+        {
+            return await _rentalContractRepository.GetBestRentedModelsAsync(months, limit) ?? [];
+        }
+
+        public async Task<VehicleModelViewRes> GetWithoutSearchAsync(Guid id)
+        {
+            var model = await _vehicleModelRepository.GetWithoutSearchAsync(id)
+                ?? throw new NotFoundException(Message.VehicleModelMessage.NotFound);
+            return _mapper.Map<VehicleModelViewRes>(model);
         }
     }
 }

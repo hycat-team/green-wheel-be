@@ -19,6 +19,7 @@ namespace Application.Dtos.User.Respone
         public StationViewRes? Station { get; set; }
         public bool NeedSetPassword { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
+        public bool HasSeenTutorial { get; set; }
     }
 }
 

@@ -11,10 +11,19 @@ namespace Infrastructure.Repositories
         {
         }
 
+        public async Task<IEnumerable<ModelImage>> GetByModelIdAsync(Guid modelId)
+        {
+            return await _dbContext.ModelImages
+                .Where(x => x.ModelId == modelId && x.DeletedAt == null)
+                .OrderByDescending(x => x.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<ModelImage>> GetByModelAndIdsAsync(Guid modelId, IEnumerable<Guid> ids)
         {
             return await _dbContext.ModelImages
                 .Where(x => x.ModelId == modelId && ids.Contains(x.Id) && x.DeletedAt == null)
+                .OrderByDescending(x => x.CreatedAt)
                 .ToListAsync();
         }
     }

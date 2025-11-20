@@ -16,7 +16,6 @@ namespace Application.UnitOfWorks
         IInvoiceItemRepository InvoiceItemRepository { get; }
         IInvoiceRepository InvoiceRepository { get; }
         IVehicleComponentRepository VehicleComponentRepository { get; }
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-
+        //Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

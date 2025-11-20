@@ -27,11 +27,11 @@ namespace Application
         private readonly IRentalContractService _rentalContractService;
 
         public InvoiceService(
-            IInvoiceUow uow, 
-            IMapper mapper, 
+            IInvoiceUow uow,
+            IMapper mapper,
             IMomoService momoService,
-            IOptions<EmailSettings> emailSettings, 
-            IEmailSerivce emailSerivce, 
+            IOptions<EmailSettings> emailSettings,
+            IEmailSerivce emailSerivce,
             IPhotoService photoService,
             IMediaUow mediaUow,
             IRentalContractService rentalContractService)
@@ -100,7 +100,8 @@ namespace Application
                 }
                 await _uow.SaveChangesAsync();
                 await _uow.CommitAsync();
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 await _uow.RollbackAsync();
                 throw;
@@ -114,6 +115,7 @@ namespace Application
             await UpdateCashInvoice(invoice, amount);
             await _uow.SaveChangesAsync();
         }
+
         public async Task PayReservationInvoiceManual(Invoice invoice, decimal amount)
         {
             await _uow.BeginTransactionAsync();
@@ -135,6 +137,7 @@ namespace Application
                 throw;
             }
         }
+
         public async Task PayRefundInvoiceManual(Invoice invoice, decimal amount)
         {
             await _uow.BeginTransactionAsync();
@@ -150,8 +153,7 @@ namespace Application
                 if (amountNeed > 0 && amount < amountNeed)
                     throw new BusinessException(Message.InvoiceMessage.InvalidAmount);
                 await UpdateCashInvoice(invoice, amount);
-               
-                
+
                 await _uow.SaveChangesAsync();
                 await _uow.CommitAsync();
             }
@@ -161,6 +163,7 @@ namespace Application
                 throw;
             }
         }
+
         private async Task UpdateCashInvoice(Invoice invoice, decimal amount)
         {
             invoice.PaidAmount = amount;
@@ -182,7 +185,6 @@ namespace Application
             await _uow.InvoiceRepository.UpdateAsync(invoice);
             await _uow.SaveChangesAsync();
         }
-
 
         public async Task<string> PayHandoverInvoiceOnline(Invoice invoice, string fallbackUrl)
         {
@@ -277,7 +279,8 @@ namespace Application
                     await _emailService.SendEmailAsync(customer.Email!, subject, body);
                 }
                 await _uow.CommitAsync();
-            }catch(Exception)
+            }
+            catch (Exception)
             {
                 await _uow.RollbackAsync();
                 throw;
@@ -286,7 +289,7 @@ namespace Application
 
         public async Task<PageResult<Invoice>?> GetAllInvoicesAsync(PaginationParams pagination)
         {
-            var invoices = await _uow.InvoiceRepository.GetAllInvoicesAsync(pagination);
+            var invoices = await _uow.InvoiceRepository.GetAllWithPaginationAsync(pagination);
 
             if (invoices == null || !invoices.Items.Any())
                 return default;
@@ -373,6 +376,7 @@ namespace Application
                 }
                 if (req.Type == (int)InvoiceType.Refund)
                 {
+                    invoice.Subtotal = InvoiceHelper.CalculateSubTotalAmount(items);
                     //xử lí refund cọc
                     contract.Status = (int)RentalContractStatus.RefundPending;
                     var deposit = await _uow.DepositRepository.GetByContractIdAsync(req.ContractId)
@@ -385,18 +389,53 @@ namespace Application
                         UnitPrice = deposit.Amount,
                         Type = (int)InvoiceItemType.Refund,
                     });
-                    if (items == null || !items.Any())
+                    if (items != null && items.Count() > 1)
                     {
                         invoice.Notes.Concat(". Deposit is non-refundable due to business policy violation");
                         deposit.Status = (int)DepositStatus.Forfeited;
                     }
-
+                    var customer = contract.Customer;
+                    var subject = "";
+                    var body = "";
+                    invoice.InvoiceItems = items!.ToList();
+                    if (InvoiceHelper.CalculateTotalAmount(invoice) == 0)
+                    {
+                        invoice.Status = (int)InvoiceStatus.Paid;
+                        contract.Status = (int)RentalContractStatus.Completed;
+                        subject = "[GreenWheel] No Refund Issued – Deposit Fully Applied to Penalties";
+                        var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "NoneRefundEmailTemplate.html");
+                        body = System.IO.File.ReadAllText(templatePath);
+                        body = body.Replace("{CustomerName}", $"{customer.LastName} {customer.FirstName}")
+                               .Replace("{ContractCode}", contract.Id.ToString());
+                    }
+                    else if (InvoiceHelper.CalculateTotalAmount(invoice) < 0)
+                    {
+                        subject = "[GreenWheel] Your Refund Ready For Collection";
+                        var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "RefundEmailTemplate.html");
+                        body = System.IO.File.ReadAllText(templatePath);
+                        body = body.Replace("{CustomerName}", $"{customer.LastName} {customer.FirstName}")
+                               .Replace("{ContractCode}", contract.Id.ToString());
+                    }
+                    else
+                    {
+                        subject = "[GreenWheel] Payment For Pentaty Required";
+                        var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "PaymentPenatyEmailTemplate.html");
+                        body = System.IO.File.ReadAllText(templatePath);
+                        body = body.Replace("{CustomerName}", $"{customer.LastName} {customer.FirstName}")
+                               .Replace("{ContractCode}", contract.Id.ToString()
+                               .Replace("{StationName}", contract.Station.Name));
+                    }
+                    if (customer.Email != null)
+                    {
+                        await _emailService.SendEmailAsync(customer.Email!, subject, body);
+                    }
+                    invoice.InvoiceItems = null;
                     await _uow.DepositRepository.UpdateAsync(deposit);
                     await _uow.RentalContractRepository.UpdateAsync(contract);
                 }
-                invoice.Subtotal = InvoiceHelper.CalculateSubTotalAmount(items);
+                invoice.Subtotal = InvoiceHelper.CalculateSubTotalAmount(items!);
                 await _uow.InvoiceRepository.AddAsync(invoice);
-                await _uow.InvoiceItemRepository.AddRangeAsync(items);
+                await _uow.InvoiceItemRepository.AddRangeAsync(items!);
                 await _uow.SaveChangesAsync();
                 await _uow.CommitAsync();
             }
@@ -434,16 +473,15 @@ namespace Application
             {
                 model.ImageUrl = uploaded.Url;
                 model.ImagePublicId = uploaded.PublicID;
-                if(model.Type == (int)InvoiceType.Refund)
+                if (model.Type == (int)InvoiceType.Refund)
                 {
                     model.Status = (int)InvoiceStatus.Paid;
                     model.PaidAt = DateTimeOffset.UtcNow;
-                    model.PaidAmount = InvoiceHelper.CalculateTotalAmount(model);  
+                    model.PaidAmount = InvoiceHelper.CalculateTotalAmount(model);
                 }
                 await _uow.InvoiceRepository.UpdateAsync(model);
                 await _uow.SaveChangesAsync();
                 await trx.CommitAsync();
-              
             }
             catch
             {
@@ -463,6 +501,42 @@ namespace Application
         public async Task DeleteImageAsync(Guid modelId)
         {
             await _photoService.DeletePhotoAsync(modelId.ToString());
+        }
+
+        public async Task WarningRefundInvoiceAsync()
+        {
+            var targetInvoice = await _uow.InvoiceRepository.GetRefundInvoiceWarningAsync();
+            if (targetInvoice == null || !targetInvoice.Any())
+            {
+                return;
+            }
+            var subject = "[GreenWheel] Important Notice: Penalty Must Be Paid Within 10 Days";
+
+            await _uow.BeginTransactionAsync();
+            try
+            {
+                foreach (var invoice in targetInvoice)
+                {
+                    var customer = invoice.Contract.Customer;
+                    var station = invoice.Contract.Station;
+                    var templatePath = Path.Combine(AppContext.BaseDirectory, "Templates", "PayPenatyWarningEmailTemplate.html");
+                    var body = System.IO.File.ReadAllText(templatePath);
+                    body = body.Replace("{CustomerName}", $"{customer.LastName} {customer.FirstName}")
+                           .Replace("{BookingId}", invoice.Contract.Id.ToString())
+                           .Replace("{StationName}", invoice.Contract.Station.Name);
+                    if (customer.Email != null)
+                    {
+                        await _emailService.SendEmailAsync(customer.Email!, subject, body);
+                    }
+                }
+                await _uow.SaveChangesAsync();
+                await _uow.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await _uow.RollbackAsync();
+                throw;
+            }
         }
     }
 }
