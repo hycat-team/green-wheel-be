@@ -107,16 +107,16 @@ namespace Application
                 BackImagePublicId = backPublicId,
                 Class = licenseClass
             };
-            var existingCccd = await _citizenRepo.GetByUserIdAsync(userId);
-            if (existingCccd != null)
-            {
-                LisenceHelper.EnsureMatch(
-                    entity.FullName,
-                    entity.DateOfBirth,
-                    existingCccd.FullName ?? "",
-                    existingCccd.DateOfBirth
-                );
-            }
+            //var existingCccd = await _citizenRepo.GetByUserIdAsync(userId);
+            //if (existingCccd != null)
+            //{
+            //    LisenceHelper.EnsureMatch(
+            //        entity.FullName,
+            //        entity.DateOfBirth,
+            //        existingCccd.FullName ?? "",
+            //        existingCccd.DateOfBirth
+            //    );
+            //}
             var existing = await _licenseRepo.GetByUserIdAsync(userId);
             if (existing != null)
             {
