@@ -13,6 +13,7 @@ namespace Application.UnitOfWorks
         IVehicleModelRepository VehicleModelRepository { get; }
         IModelComponentRepository ModelComponentRepository { get; }
         IVehicleComponentRepository VehicleComponentRepository { get; }
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+        //Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

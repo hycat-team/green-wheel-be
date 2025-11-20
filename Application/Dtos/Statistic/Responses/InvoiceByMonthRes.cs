@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace Application.Dtos.Statistic.Responses
 {
-    public class CustomerRes
+    public class InvoiceByMonthRes
     {
-        public int CustomerInThisMonth { get; set; }
-        public int CustomerInLastMonth { get; set; }
-        public decimal ChangeRate { get; set; }
+        public string MonthName { get; set; } = string.Empty;
+        public decimal TotalInvoice { get; set; }
     }
 }

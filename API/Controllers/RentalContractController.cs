@@ -58,7 +58,8 @@ namespace API.Controllers
         [RoleAuthorize(RoleName.Staff)]
         public async Task<IActionResult> ConfirmRentalContract(Guid id, [FromBody] ConfirmReq req)
         {
-            await _rentalContractService.VerifyRentalContract(id, req);
+            var staffClaims = HttpContext.User;
+            await _rentalContractService.VerifyRentalContract(id, req, staffClaims);
             return Ok();
         }
 
@@ -88,7 +89,7 @@ namespace API.Controllers
         /// <returns>List of rental contracts that match the specified criteria.</returns>
         /// <response code="200">Success.</response>
         /// <response code="404">Rental contract not found.</response>
-        [RoleAuthorize(RoleName.Staff)]
+        [RoleAuthorize(RoleName.Staff, RoleName.Admin, RoleName.SuperAdmin)]
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] GetAllRentalContactReq req,
@@ -107,7 +108,7 @@ namespace API.Controllers
         /// <response code="200">Success.</response>
         /// <response code="404">Rental contract not found.</response>
         /// <response code="422">Business error (invalid handover conditions).</response>
-        [RoleAuthorize(RoleName.Staff)]
+        [RoleAuthorize(RoleName.Staff, RoleName.Customer)]
         [HttpPut("{id}/handover")]
         public async Task<IActionResult> HandoverRentalContract(Guid id, HandoverContractReq req)
         {
@@ -195,7 +196,8 @@ namespace API.Controllers
         [HttpPut("{id}/cancel")]
         public async Task<IActionResult> CancelRentalContract(Guid id)
         {
-            await _rentalContractService.CancelRentalContract(id);
+            var userClaims = HttpContext.User;
+            await _rentalContractService.CancelRentalContract(id, userClaims);
             return Ok();
         }
 
@@ -229,7 +231,8 @@ namespace API.Controllers
         [RoleAuthorize(RoleName.Customer)]
         public async Task<IActionResult> ProcessCustomerConfirm(Guid id, CustomerResolutionOptionReq req)
         {
-            await _rentalContractService.ProcessCustomerConfirm(id, req.ResolutionOption);
+            var userClaims = HttpContext.User;
+            await _rentalContractService.ProcessCustomerConfirm(id, req.ResolutionOption, userClaims);
             return Ok();
         }
     }

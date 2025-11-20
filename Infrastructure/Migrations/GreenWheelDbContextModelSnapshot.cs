@@ -268,11 +268,14 @@ namespace Infrastructure.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("description");
 
-                    b.Property<Guid>("FromStationId")
+                    b.Property<string>("FinalDescription")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("final_description");
+
+                    b.Property<Guid?>("FromStationId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("from_station_id");
 
@@ -1139,6 +1142,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("first_name");
 
+                    b.Property<bool>("HasSeenTutorial")
+                        .HasColumnType("bit")
+                        .HasColumnName("has_seen_tutorial");
+
                     b.Property<bool>("IsGoogleLinked")
                         .HasColumnType("bit")
                         .HasColumnName("is_google_linked");
@@ -1592,7 +1599,6 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Station", "FromStation")
                         .WithMany("DispatchRequestFromStations")
                         .HasForeignKey("FromStationId")
-                        .IsRequired()
                         .HasConstraintName("fk_dispatch_requests_from_stations");
 
                     b.HasOne("Domain.Entities.Staff", "RequestAdmin")

@@ -48,7 +48,7 @@ CREATE TABLE [users] (
     [avatar_url] nvarchar(500),
     [avatar_public_id] nvarchar(255),
 	[is_google_linked] bit NOT NULL DEFAULT 0,
-
+	[has_seen_tutorial] bit NOT NULL DEFAULT 0,
     [created_at] datetimeoffset NOT NULL DEFAULT SYSDATETIMEOFFSET(),
     [updated_at] datetimeoffset NOT NULL DEFAULT SYSDATETIMEOFFSET(),
     [deleted_at] datetimeoffset,
@@ -466,7 +466,8 @@ GO
 
 CREATE TABLE [dispatch_requests] (
     [id] uniqueidentifier PRIMARY KEY DEFAULT NEWID(),
-    [description] nvarchar(255),
+    [description] nvarchar(max),
+    [final_description] nvarchar(max),
     [status] int NOT NULL DEFAULT 0, -- Pending, Approved, Rejected, Received
 
     [created_at] datetimeoffset NOT NULL DEFAULT SYSDATETIMEOFFSET(),
@@ -475,7 +476,7 @@ CREATE TABLE [dispatch_requests] (
     
     [request_admin_id] uniqueidentifier NOT NULL,
     [approved_admin_id] uniqueidentifier,
-    [from_station_id] uniqueidentifier NOT NULL,
+    [from_station_id] uniqueidentifier,
     [to_station_id] uniqueidentifier NOT NULL,
 
     CONSTRAINT fk_dispatch_requests_request_admins FOREIGN KEY ([request_admin_id]) REFERENCES [staffs]([user_id]),

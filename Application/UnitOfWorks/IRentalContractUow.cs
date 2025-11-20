@@ -14,6 +14,6 @@ namespace Application.UnitOfWorks
         IStationRepository StationRepository { get; }
         ICitizenIdentityRepository CitizenIdentityRepository { get; }
         IDriverLicenseRepository DriverLicenseRepository { get; }
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+        //Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

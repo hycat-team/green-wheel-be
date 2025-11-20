@@ -13,8 +13,12 @@ namespace Application.Repositories
         // giúp useAuth ở frontend biết chắc user có role “staff”.
         //Task<IEnumerable<User>> GetAllAsync(string? phone, string? citizenIdNumber, string? driverLicenseNumber);
         Task<PageResult<User>> GetAllWithPaginationAsync(
-            string? phone, string? citizenIdNumber, string? driverLicenseNumber, string? roleName,
-            PaginationParams pagination);
+            PaginationParams pagination,
+            string? phone,
+            string? citizenIdNumber,
+            string? driverLicenseNumber,
+            string? roleName,
+            Guid? stationId);
 
         Task<User?> GetByIdWithFullInfoAsync(Guid id);
 
@@ -24,6 +28,6 @@ namespace Application.Repositories
 
         Task<PageResult<User>> GetAllStaffAsync(PaginationParams pagination, string? name, Guid? stationId);
 
-        
+        Task<IEnumerable<User?>> GetAllAsync(string role);
     }
 }

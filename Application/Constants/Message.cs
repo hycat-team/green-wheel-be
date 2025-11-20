@@ -1,5 +1,7 @@
 ﻿using Application.Dtos.BusinessVariable.Request;
+using Application.Dtos.Vehicle.Request;
 using Application.Dtos.VehicleChecklist.Request;
+using Application.Dtos.VehicleChecklistItem.Request;
 using Application.Dtos.VehicleSegment.Request;
 
 namespace Application.Constants
@@ -108,6 +110,7 @@ namespace Application.Constants
             public const string LicensePlateRequired = "vehicle.license_plate_required";
             public const string StationIdRequired = "vehicle.station_id_required";
             public const string ModelIdRequired = "vehicle.model_id_required";
+            public const string InvalidLicensePlateFormat = "vehicle.invalid_license_plate_format";
         }
 
         public static class VehicleModelMessage
@@ -155,38 +158,43 @@ namespace Application.Constants
             public const string NotFound = "dispatch.not_found";
 
             // Validation khi tạo
-            public const string ToStationMustDifferent = "dispatch.to_station_must_different";
 
+            public const string ToStationMustDifferent = "dispatch.to_station_must_different";
             public const string ToStationRequied = "dispatch.to_station_require";
             public const string ModelRequied = "dispatch.model_require";
             public const string NumberOfVehicleShouldGreaterThanZero = "dispatch.number_vehicle_greater_than_zero";
 
             public const string StaffNotInFromStation = "dispatch.staff_not_in_from_station";
+            public const string InvalidNumberOfStaffs = "dispatch.invalid_number_of_staffs";
             public const string StaffNotEnoughtInFromStation = "dispatch.staff_not_enought_in_from_station";
-            public const string VehicleNotInFromStation = "dispatch.vehicle_not_in_from_station";
             public const string StaffLimitInFromStation = "dispatch.staff_limit_in_from_station";
+
+            public const string InvalidNumberOfVehicles = "dispatch.invalid_number_of_vehicles";
+            public const string VehicleNotInFromStation = "dispatch.vehicle_not_in_from_station";
+            public const string VehicleNotEnoughtInFromStation = "dispatch.vehicle_not_enought_in_from_station";
             public const string VehicleLimitInFromStation = "dispatch.vehicle_limit_in_from_station";
             public const string VehicleOrStaffNotInFromStation = "dispatch.vehicle_or_staff_not_in_from_station";
+            public const string NoStaffNoVehicleReject = "dispatch.no_staff_no_vehicle_reject";
 
             // Flow cập nhật trạng thái
-            public const string OnlyPendingCanApproveReject = "dispatch.only_pending_can_approve_reject";
 
-            public const string OnlyApprovedCanReceive = "dispatch.only_approved_can_receive";
+            public const string OnlyPendingCanApproveReject = "dispatch.only_pending_can_approve_reject";
             public const string OnlyPendingCanCancel = "dispatch.only_pending_can_cancel";
-            public const string OnlyApproveCanConfirm = "dispatch.only_approved_can_confirm";
-            public const string OnlyConfirmCanReceive = "dispatch.only_confirm_can_receive";
+            public const string OnlyApproveCanAssign = "dispatch.only_approved_can_assign";
+            public const string OnlyAssignCanReceive = "dispatch.only_assign_can_receive";
 
             // Quyền
-            public const string MustBeToStationAdminForThisAction = "dispatch.must_be_to_station_admin";
 
+            public const string MustBeToStationAdminForThisAction = "dispatch.must_be_to_station_admin";
             public const string MustBeFromStationAdminForThisAction = "dispatch.must_be_from_station_admin";
 
             // Input
+
             public const string InvalidStatus = "dispatch.invalid_status";
 
             public const string IdNull = "dispatch.id_null";
-
-            public static string FromStationIsRequire = "dispatch.from_station_is_required";
+            public const string FromStationIsRequire = "dispatch.from_station_is_required";
+            public const string FinalDescriptionIsRequire = "dispatch.final_description_is_required";
         }
 
         //Rental Contract
@@ -205,7 +213,7 @@ namespace Application.Constants
             public const string StationIdRequired = "rental_contract.station_id_required";
             public const string AtLeastOnePartyMustSign = "rental_contract.at_least_one_party_must_sign";
 
-            public static string ContractNotStartYet = "rental_contraact.not_start_yet";
+            public static string ContractNotStartYet = "rental_contract.not_start_yet";
         }
 
         //Station
@@ -328,6 +336,8 @@ namespace Application.Constants
             public static string AtLeastOnePartyMustSign = "vehicle_checklist.at_least_one_party_must_sign";
 
             public static string InvalidType = "vehicle_checklist.invalid_type";
+
+            public static string InvalidStatus = "vehicle_checklist.invalid_status";
         }
 
         public static class VehicleChecklistItemMessage

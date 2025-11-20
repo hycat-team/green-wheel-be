@@ -1,4 +1,5 @@
-﻿using Application.Dtos.VehicleModel.Request;
+﻿using Application.Dtos.RentalContract.Respone;
+using Application.Dtos.VehicleModel.Request;
 using Application.Dtos.VehicleModel.Respone;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
@@ -18,9 +19,10 @@ namespace Application.Abstractions
 
         Task<int> UpdateVehicleModelAsync(Guid Id, UpdateVehicleModelReq updateVehicleModelReq);
 
-        Task<bool> DeleteVehicleModleAsync(Guid id);
+        Task DeleteVehicleModleAsync(Guid id);
 
         Task<VehicleModelViewRes> GetByIdAsync(Guid id, Guid stationId, DateTimeOffset startDate, DateTimeOffset endDate);
+        Task<VehicleModelViewRes> GetWithoutSearchAsync(Guid id);
 
         Task<string> UploadMainImageAsync(Guid modelId, IFormFile file);
         Task<IEnumerable<VehicleModelViewRes>> GetAllAsync(string? name, Guid? segmentId);
@@ -28,5 +30,6 @@ namespace Application.Abstractions
         Task UpdateVehicleModelComponentsAsync(Guid id, UpdateModelComponentsReq req);
         Task<IEnumerable<VehicleModelViewRes>> GetAllAsync();
         Task<IEnumerable<string>> GetAllModelMainImage();
+        Task<IEnumerable<BestRentedModel>> GetBestRentedModelsAsync(int months, int limit);
     }
 }

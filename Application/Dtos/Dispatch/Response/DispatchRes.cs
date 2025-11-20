@@ -5,11 +5,12 @@ namespace Application.Dtos.Dispatch.Response
     public class DispatchRes
     {
         public Guid Id { get; init; }
-        public string? Description { get; init; }
+        public DispatchDescriptionDto? Description { get; init; }
+        public DispatchDescriptionDto? FinalDescription { get; init; }
 
-        public Guid FromStationId { get; init; }
+        public Guid? FromStationId { get; init; }
         public Guid ToStationId { get; init; }
-        public string FromStationName { get; init; } = default!;
+        public string? FromStationName { get; init; } = default!;
         public string ToStationName { get; init; } = default!;
 
         public DispatchRequestStatus Status { get; init; }
@@ -27,5 +28,18 @@ namespace Application.Dtos.Dispatch.Response
 
         public IEnumerable<DispatchRequestVehicleRes> DispatchRequestVehicles { get; init; }
             = new List<DispatchRequestVehicleRes>();
+    }
+
+    public class DispatchDescriptionVehicleDto
+    {
+        public Guid ModelId { get; set; }
+        public string? ModelName { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    public class DispatchDescriptionDto
+    {
+        public int NumberOfStaffs { get; set; }
+        public IList<DispatchDescriptionVehicleDto>? Vehicles { get; set; }
     }
 }

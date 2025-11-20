@@ -90,6 +90,7 @@ namespace Application
             if (req.DateOfBirth != null) userFromDb.DateOfBirth = req.DateOfBirth;
             if (req.Sex != null) userFromDb.Sex = req.Sex;
             if (!string.IsNullOrEmpty(req.AvatarUrl)) userFromDb.AvatarUrl = req.AvatarUrl;
+            if (req.HasSeenTutorial != null) userFromDb.HasSeenTutorial = (bool)req.HasSeenTutorial;
             await _userRepository.UpdateAsync(userFromDb);
         }
 

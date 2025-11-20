@@ -10,6 +10,8 @@ public partial class DispatchRequest : SorfDeletedEntity, IEntity
 
     public string? Description { get; set; }
 
+    public string? FinalDescription { get; set; }
+
     public int Status { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
@@ -20,7 +22,7 @@ public partial class DispatchRequest : SorfDeletedEntity, IEntity
 
     public Guid? ApprovedAdminId { get; set; }
 
-    public Guid FromStationId { get; set; }
+    public Guid? FromStationId { get; set; }
 
     public Guid ToStationId { get; set; }
 
@@ -30,7 +32,7 @@ public partial class DispatchRequest : SorfDeletedEntity, IEntity
 
     public virtual ICollection<DispatchRequestVehicle> DispatchRequestVehicles { get; set; } = new List<DispatchRequestVehicle>();
 
-    public virtual Station FromStation { get; set; } = null!;
+    public virtual Station? FromStation { get; set; }
 
     public virtual Staff RequestAdmin { get; set; } = null!;
 

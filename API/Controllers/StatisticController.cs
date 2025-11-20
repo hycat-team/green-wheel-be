@@ -15,26 +15,18 @@ namespace API.Controllers
     /// </summary>
     [Route("api/statistic")]
     [ApiController]
-    [RoleAuthorize(RoleName.Admin)]
-    public class StatisticController(IStatisticService statisticService, IStaffRepository staffRepository) : ControllerBase
+    [RoleAuthorize(RoleName.SuperAdmin, RoleName.Admin)]
+    public class StatisticController(IStatisticService statisticService) : ControllerBase
     {
         private readonly IStatisticService _statisticService = statisticService;
-        private readonly IStaffRepository _staffRepository = staffRepository;
-
-        private async Task<Guid?> GetCurrentStationIdAsync()
-        {
-            var userId = Guid.Parse(User.FindFirst(JwtRegisteredClaimNames.Sid)!.Value);
-            var staff = await _staffRepository.GetByUserIdAsync(userId);
-            return staff?.StationId;
-        }
 
         /// <summary>
         /// Get statistics for registered customers this and last month.
         /// </summary>
         [HttpGet("customers")]
-        public async Task<ActionResult<CustomerRes>> GetCustomers([FromQuery] PaginationParams pagination)
+        public async Task<ActionResult> GetCustomers()
         {
-            var result = await _statisticService.GetCustomer(pagination);
+            var result = await _statisticService.GetCustomer();
             return Ok(result);
         }
 
@@ -42,9 +34,9 @@ namespace API.Controllers
         /// Get statistics for anonymous customers (no email).
         /// </summary>
         [HttpGet("customers/anonymous")]
-        public async Task<ActionResult<CustomerAnonymusRes>> GetAnonymousCustomers([FromQuery] PaginationParams pagination)
+        public async Task<ActionResult> GetAnonymousCustomers()
         {
-            var result = await _statisticService.GetAnonymusCustomer(pagination);
+            var result = await _statisticService.GetAnonymusCustomer();
             return Ok(result);
         }
 
@@ -52,10 +44,9 @@ namespace API.Controllers
         /// Get revenue summary for this and last month.
         /// </summary>
         [HttpGet("revenue")]
-        public async Task<ActionResult<TotalRevenueRes>> GetTotalRevenue([FromQuery] PaginationParams pagination)
+        public async Task<ActionResult> GetTotalRevenue([FromQuery] Guid? stationId)
         {
-            var stationId = await GetCurrentStationIdAsync();
-            var result = await _statisticService.GetTotalRevenue(stationId, pagination);
+            var result = await _statisticService.GetTotalRevenue(stationId);
             return Ok(result);
         }
 
@@ -63,10 +54,19 @@ namespace API.Controllers
         /// Get total invoices created for this and last month.
         /// </summary>
         [HttpGet("invoices")]
-        public async Task<ActionResult<TotalStatisticRes>> GetTotalStatistic([FromQuery] PaginationParams pagination)
+        public async Task<ActionResult> GetTotalInvoice([FromQuery] Guid? stationId)
         {
-            var stationId = await GetCurrentStationIdAsync();
-            var result = await _statisticService.GetTotalStatistic(stationId, pagination);
+            var result = await _statisticService.GetTotalInvoice(stationId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get total contracts created for this and last month.
+        /// </summary>
+        [HttpGet("contracts")]
+        public async Task<ActionResult> GetTotalContracts([FromQuery] Guid? stationId)
+        {
+            var result = await _statisticService.GetTotalContracts(stationId);
             return Ok(result);
         }
 
@@ -74,19 +74,18 @@ namespace API.Controllers
         /// Get total number of vehicles by status for current station.
         /// </summary>
         [HttpGet("vehicles")]
-        public async Task<ActionResult<VehicleTotalRes>> GetVehicleTotal()
+        public async Task<ActionResult> GetVehicleTotal([FromQuery] Guid? stationId)
         {
-            var stationId = await GetCurrentStationIdAsync();
             var result = await _statisticService.GetVehicleTotal(stationId);
             return Ok(result);
         }
+
         /// <summary>
         /// Get total number of vehicles by status for current station.
         /// </summary>
         [HttpGet("vehicle-models")]
-        public async Task<ActionResult> GetVehicleModelTotal()
+        public async Task<ActionResult> GetVehicleModelTotal([FromQuery] Guid? stationId)
         {
-            var stationId = await GetCurrentStationIdAsync();
             var result = await _statisticService.GetVehicleModelTotal(stationId);
             return Ok(result == null ? [] : result.VehicleModelsForStatisticRes);
         }
@@ -95,17 +94,56 @@ namespace API.Controllers
         /// Get total revenue for each month in a specific year.
         /// </summary>
         /// <param name="year">
-        /// The target year to calculate revenue.  
+        /// The target year to calculate revenue.
         /// If not provided, defaults to the current year.
         /// </param>
+        /// <param name="stationId"></param>
         /// <returns>List of months with total revenue per month.</returns>
         [HttpGet("revenue-by-year")]
-        public async Task<IActionResult> GetRevenueByYear([FromQuery] int? year)
+        public async Task<IActionResult> GetRevenueByYear([FromQuery] int? year, [FromQuery] Guid? stationId)
         {
-            var stationId = await GetCurrentStationIdAsync();
-            var targetYear = year ?? DateTime.UtcNow.Year; 
+            var targetYear = year ?? DateTime.UtcNow.Year;
 
             var result = await _statisticService.GetRevenueByYear(stationId, targetYear);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get total invoice for each month in a specific year.
+        /// </summary>
+        /// <param name="year">
+        /// The target year to calculate revenue.
+        /// If not provided, defaults to the current year.
+        /// </param>
+        /// <param name="stationId"></param>
+        /// <returns>List of months with total revenue per month.</returns>
+        [HttpGet("invoice-by-year")]
+        public async Task<IActionResult> GetInvoiceByYear([FromQuery] int? year, [FromQuery] Guid? stationId)
+        {
+            var targetYear = year ?? DateTime.UtcNow.Year;
+
+            var result = await _statisticService.GetInvoiceByYear(stationId, targetYear);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get total contracts for each month in a specific year.
+        /// </summary>
+        /// <param name="year">
+        /// The target year to calculate contracts.
+        /// If not provided, defaults to the current year.
+        /// </param>
+        /// <param name="stationId">
+        /// Optional station ID.
+        /// If not provided, returns contracts from all stations.
+        /// </param>
+        /// <returns>List of months with total contracts per month.</returns>
+        [HttpGet("contract-by-year")]
+        public async Task<IActionResult> GetContractByYear([FromQuery] int? year, [FromQuery] Guid? stationId)
+        {
+            var targetYear = year ?? DateTime.UtcNow.Year;
+
+            var result = await _statisticService.GetContractByYear(stationId, targetYear);
             return Ok(result);
         }
     }

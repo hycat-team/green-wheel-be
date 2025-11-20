@@ -25,6 +25,23 @@ namespace Application
             _mapper = mapper;
         }
 
+        public async Task<IEnumerable<VehicleModelMainImageRes>> GetAllVehicleModelMainImagesAsync()
+        {
+            var models = await _uow.VehicleModelRepository.GetAllAsync();
+
+            var result = models
+                .Where(m => !string.IsNullOrEmpty(m.ImageUrl))
+                .Select(m => new VehicleModelMainImageRes
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    ImageUrl = m.ImageUrl
+                })
+                .ToList();
+
+            return result;
+        }
+
         // =================
         // Upload img
         // =================
@@ -61,7 +78,7 @@ namespace Application
 
             var mainUpload = await _photoService.UploadPhotoAsync(new UploadImageReq { File = mainFile }, $"models/{modelId}/main");
 
-            await using var trx = await _uow.BeginTransactionAsync();
+            await _uow.BeginTransactionAsync();
 
             try
             {
@@ -73,13 +90,13 @@ namespace Application
                 var galleryDtos = await UploadModelImagesHelperAsync(modelId, galleryFiles);
                 model.ModelImages = [.. galleryDtos];
                 await _uow.SaveChangesAsync();
-                await trx.CommitAsync();
+                await _uow.CommitAsync();
 
                 return _mapper.Map<VehicleModelImagesRes>(model);
             }
             catch
             {
-                await trx.RollbackAsync();
+                await _uow.RollbackAsync();
 
                 try { await _photoService.DeletePhotoAsync(mainUpload.PublicID); } catch { }
 
@@ -125,8 +142,7 @@ namespace Application
             if (imageIds == null || imageIds.Count == 0)
                 throw new BadRequestException(Message.CommonMessage.UnexpectedError);
 
-            var images = await _uow.ModelImageRepository.FindAsync(x =>
-                imageIds.Contains(x.Id) && x.ModelId == modelId);
+            var images = await _uow.ModelImageRepository.GetByIdsAsync([.. imageIds]);
 
             if (!images.Any())
                 throw new NotFoundException(Message.CloudinaryMessage.NotFoundObjectInFile);
@@ -147,21 +163,38 @@ namespace Application
             await _uow.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<VehicleModelMainImageRes>> GetAllVehicleModelMainImagesAsync()
+        public async Task DeleteAllModelImagesAsync(Guid modelId)
         {
-            var models = await _uow.VehicleModelRepository.GetAllAsync();
+            var model = await _uow.VehicleModelRepository.GetByIdAsync(modelId)
+                ?? throw new NotFoundException(Message.VehicleModelMessage.NotFound);
 
-            var result = models
-                .Where(m => !string.IsNullOrEmpty(m.ImageUrl))
-                .Select(m => new VehicleModelMainImageRes
+            if (!string.IsNullOrEmpty(model.ImagePublicId))
+            {
+                try
                 {
-                    Id = m.Id,
-                    Name = m.Name,
-                    ImageUrl = m.ImageUrl
-                })
-                .ToList();
+                    await _photoService.DeletePhotoAsync(model.ImagePublicId);
+                }
+                catch
+                {
+                }
+                model.ImageUrl = null;
+                model.ImagePublicId = null;
+                await _uow.VehicleModelRepository.UpdateAsync(model);
+            }
 
-            return result;
+            var images = await _uow.ModelImageRepository.GetByModelIdAsync(modelId) ?? [];
+            foreach (var image in images)
+            {
+                try
+                {
+                    await _photoService.DeletePhotoAsync(image.PublicId);
+                }
+                catch
+                {
+                }
+                _uow.ModelImageRepository.Remove(image);
+            }
+            await _uow.SaveChangesAsync();
         }
     }
 }

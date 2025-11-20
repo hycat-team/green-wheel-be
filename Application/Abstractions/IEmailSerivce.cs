@@ -8,6 +8,6 @@ namespace Application.Abstractions
 {
     public interface IEmailSerivce
     {
-        Task SendEmailAsync(string toEmail, string subject, string body);
+        Task SendEmailAsync(string? toEmail, string subject, string body);
     }
 }
