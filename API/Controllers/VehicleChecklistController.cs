@@ -7,6 +7,7 @@ using Application.Dtos.VehicleChecklist.Request;
 using Application.Dtos.VehicleChecklistItem.Request;
 using Application.Dtos.VehicleModel.Respone;
 using Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,7 +38,6 @@ namespace API.Controllers
             var id = await _vehicleChecklistService.Create(staff, req);
             return Ok(new { id });
         }
-
 
         /// <summary>
         /// Updates an existing vehicle checklist (staff only).
@@ -75,8 +75,8 @@ namespace API.Controllers
             var staffClaims = HttpContext.User;
             await _vehicleChecklistService.UpdateItemsAsync(id, req.Status, req.Notes, staffClaims);
             return Ok();
-
         }
+
         /// <summary>
         /// Retrieves a vehicle checklist by its unique identifier (accessible by staff and customers).
         /// </summary>
@@ -85,7 +85,7 @@ namespace API.Controllers
         /// <response code="200">Success.</response>
         /// <response code="404">Vehicle checklist not found.</response>
         [HttpGet("{id}")]
-        [RoleAuthorize(RoleName.Staff, RoleName.Customer)]
+        [Authorize]
         public async Task<IActionResult> GetById(Guid id)
         {
             var user = HttpContext.User;
@@ -103,7 +103,7 @@ namespace API.Controllers
         /// <response code="200">Success.</response>
         /// <response code="404">No vehicle checklists found.</response>
         [HttpGet]
-        [RoleAuthorize(RoleName.Staff, RoleName.Customer)]
+        [Authorize]
         public async Task<IActionResult> GetAll([FromQuery] Guid? contractId, [FromQuery] int? type, [FromQuery] PaginationParams pagination)
         {
             var user = HttpContext.User;

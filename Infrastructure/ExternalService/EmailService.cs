@@ -14,8 +14,10 @@ namespace Infrastructure.ExternalService
             _emailSettings = emailSettings.Value;
         }
        
-        public async Task SendEmailAsync(string toEmail, string subject, string body)
+        public async Task SendEmailAsync(string? toEmail, string subject, string body)
         {
+
+            if (toEmail == null) return;
 
             var mail = new MailMessage()
             {

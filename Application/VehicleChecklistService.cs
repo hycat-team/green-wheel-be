@@ -36,24 +36,23 @@ namespace Application
             _rentalContractService = rentalContractService;
         }
 
-        
-
         public async Task<Guid> Create(ClaimsPrincipal userclaims, CreateVehicleChecklistReq req)
         {
             var staffId = userclaims.FindFirst(JwtRegisteredClaimNames.Sid)!.Value.ToString();
-            if(req.Type != (int)VehicleChecklistType.OutOfContract)
+            if (req.Type != (int)VehicleChecklistType.OutOfContract)
             {
                 return await CreateVehicleChecklistInSideContract(Guid.Parse(staffId), (Guid)req.ContractId!, req.Type);
             }
             else
             {
-                if(!(await _rentalContractService.VerifyStaffPermission(userclaims, (Guid)req.ContractId!)))
+                if (!(await _rentalContractService.VerifyStaffPermission(userclaims, (Guid)req.ContractId!)))
                 {
                     throw new ForbidenException(Message.UserMessage.DoNotHavePermission);
                 }
                 return await CreateVehicleChecklistOutSideContract(Guid.Parse(staffId), (Guid)req.VehicleId!, req.Type);
             }
         }
+
         private async Task<Guid> CreateVehicleChecklistOutSideContract(Guid staffId, Guid vehicleId, int type)
         {
             await _uow.BeginTransactionAsync();
@@ -91,13 +90,12 @@ namespace Application
                 await _uow.SaveChangesAsync();
                 await _uow.CommitAsync();
                 return checklist.Id;
-               
             }
             catch (Exception)
             {
                 await _uow.RollbackAsync();
                 throw;
-            } 
+            }
         }
 
         private async Task<Guid> CreateVehicleChecklistInSideContract(Guid staffId, Guid contractId, int type)
@@ -147,8 +145,6 @@ namespace Application
             }
         }
 
-        
-
         public async Task UpdateAsync(UpdateVehicleChecklistReq req, Guid id, ClaimsPrincipal staffClaims)
         {
             await _uow.BeginTransactionAsync();
@@ -165,7 +161,7 @@ namespace Application
                 }
                 else
                 {
-                    if(!(await _rentalContractService.VerifyStaffPermission(staffClaims, (Guid)checklist.ContractId!)))
+                    if (!(await _rentalContractService.VerifyStaffPermission(staffClaims, (Guid)checklist.ContractId!)))
                         throw new ForbidenException(Message.UserMessage.DoNotHavePermission);
                     if (checklist.Type == (int)VehicleChecklistType.Handover)
                     {
@@ -177,7 +173,7 @@ namespace Application
                         ?? throw new NotFoundException(Message.RentalContractMessage.NotFound);
                         await UpdateReturnChecklistAsync(checklist, req.ChecklistItems, contract, req.MaintainUntil);
                     }
-                }                
+                }
                 checklist.IsSignedByStaff = req.IsSignedByStaff;
                 checklist.IsSignedByCustomer = req.IsSignedByCustomer;
 
@@ -189,10 +185,9 @@ namespace Application
                 await _uow.RollbackAsync();
                 throw;
             }
-            
         }
 
-        private void UpdateHandoverchecklistOrChecklistOutSideAsync(VehicleChecklist checklist, 
+        private void UpdateHandoverchecklistOrChecklistOutSideAsync(VehicleChecklist checklist,
             IEnumerable<UpdateChecklistItemReq> checklictReq)
         {
             foreach (var itemReq in checklictReq)
@@ -209,13 +204,13 @@ namespace Application
                     existingItem.Notes = itemReq.Notes;
                 }
             }
-            
         }
+
         private async Task UpdateReturnChecklistAsync(VehicleChecklist checklist,
             IEnumerable<UpdateChecklistItemReq> checklistReq, RentalContract contract,
             DateTimeOffset? maintainUntil)
         {
-            if(maintainUntil != null)
+            if (maintainUntil != null)
             {
                 checklist.MaintainedUntil = maintainUntil;
                 await _uow.VehicleChecklistRepository.UpdateAsync(checklist);
@@ -261,13 +256,12 @@ namespace Application
             var anotherContract = (await _uow.RentalContractRepository.GetByVehicleIdAsync((Guid)contract.VehicleId!));
             anotherContract = anotherContract != null ? anotherContract.Where(c => c.Id != contract.Id
                     &&
-                    c.Status == (int)RentalContractStatus.Active) 
-                    : null; 
+                    c.Status == (int)RentalContractStatus.Active)
+                    : null;
 
             var vehicle = await _uow.VehicleRepository.GetByIdAsync((Guid)contract.VehicleId);
             vehicle!.Status = anotherContract != null ? (int)VehicleStatus.Unavaible : (int)VehicleStatus.Available;
             await _uow.VehicleRepository.UpdateAsync(vehicle);
-            
         }
 
         public async Task UpdateItemsAsync(Guid id, int status, string? notes, ClaimsPrincipal staffClaims)
@@ -284,9 +278,9 @@ namespace Application
             if (!string.IsNullOrEmpty(notes)) item.Notes = notes;
             await _uow.VehicleChecklistItemRepository.UpdateAsync(item);
         }
+
         public async Task<VehicleChecklistViewRes> GetByIdAsync(Guid id, ClaimsPrincipal userClaims)
         {
-
             var vehicleChecklist = await _uow.VehicleChecklistRepository.GetByIdAsync(id);
             if (vehicleChecklist == null)
             {
@@ -300,6 +294,7 @@ namespace Application
             var checklistViewRes = _mapper.Map<VehicleChecklistViewRes>(vehicleChecklist);
             return checklistViewRes;
         }
+
         public async Task<PageResult<VehicleChecklistViewRes>> GetAllPagination(Guid? contractId, int? type, ClaimsPrincipal userClaims, PaginationParams pagination)
         {
             var userId = Guid.Parse(userClaims.FindFirst(JwtRegisteredClaimNames.Sid)!.Value.ToString());
@@ -315,16 +310,13 @@ namespace Application
                 vehicleChecklists.Total
             );
         }
+
         private async Task<bool> CheckAuthorize(Guid userId, Guid? contractId = null)
         {
             var roles = _cache.Get<List<Role>>(Common.SystemCache.AllRoles);
             var userInDB = await _userRepository.GetByIdAsync(userId);
             var userRole = roles!.FirstOrDefault(r => r.Id == userInDB!.RoleId)!.Name;
-            if (userRole == RoleName.Staff)
-            {
-                return true;
-            }
-            else //(userRole == RoleName.Customer
+            if (userRole == RoleName.Customer)
             {
                 if (contractId != null)
                 {
@@ -332,6 +324,10 @@ namespace Application
                     if (contract!.CustomerId == userId) return true;
                 }
                 return false;
+            }
+            else
+            {
+                return true;
             }
         }
 
@@ -341,7 +337,7 @@ namespace Application
             {
                 var checklist = await _uow.VehicleChecklistRepository.GetByIdAsync(id)
                     ?? throw new NotFoundException(Message.VehicleChecklistMessage.NotFound);
-                if (checklist.Type == (int)VehicleChecklistType.OutOfContract ||  checklist.CustomerId != userId)
+                if (checklist.Type == (int)VehicleChecklistType.OutOfContract || checklist.CustomerId != userId)
                 {
                     throw new ForbidenException(Message.UserMessage.DoNotHavePermission);
                 }

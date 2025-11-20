@@ -89,7 +89,7 @@ namespace API.Controllers
         /// <returns>List of rental contracts that match the specified criteria.</returns>
         /// <response code="200">Success.</response>
         /// <response code="404">Rental contract not found.</response>
-        [RoleAuthorize(RoleName.Staff)]
+        [RoleAuthorize(RoleName.Staff, RoleName.Admin, RoleName.SuperAdmin)]
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] GetAllRentalContactReq req,
