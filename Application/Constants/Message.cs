@@ -96,6 +96,7 @@ namespace Application.Constants
             // Bank info
 
             public const string FullNameIsRequired = "user.full_name_require";
+            public const string PasswordTooLow = "user.password_too_low";
         }
 
         //Common error
