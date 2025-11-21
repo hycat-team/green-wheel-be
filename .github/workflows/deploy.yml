@@ -36,8 +36,12 @@ jobs:
           REGISTRY=$(az acr show -n "${{ secrets.ACR_NAME }}" --query loginServer -o tsv)
           echo "REGISTRY=$REGISTRY" >> $GITHUB_ENV
 
-      - name: ACR Login
-        run: az acr login -n ${{ secrets.ACR_NAME }}
+      - name: ACR Login (with username/password)
+        run: |
+          az acr login \
+            --name ${{ secrets.ACR_NAME }} \
+            --username '${{ secrets.ACR_USERNAME }}' \
+            --password '${{ secrets.ACR_PASSWORD }}'
 
       - name: Build & Push Docker Image
         run: |
@@ -49,7 +53,7 @@ jobs:
       - name: Ensure Container Apps Environment exists
         run: |
           az containerapp env show -g $RG -n $ENV_NAME || \
-          az containerapp env create -g $RG -n $ENV_NAME -l $LOCATION
+          az.containerapp.env.create -g $RG -n $ENV_NAME -l $LOCATION
 
       - name: Create Container App if not exists
         run: |
@@ -60,16 +64,12 @@ jobs:
               --environment $ENV_NAME \
               --image mcr.microsoft.com/dotnet/aspnet:8.0 \
               --system-assigned \
-              --ingress external --target-port $PORT
+              --ingress external \
+              --target-port $PORT
           fi
 
-      - name: Configure ACR credentials
-        run: |
-          az containerapp registry set \
-            -g $RG -n $APP_NAME \
-            --server $REGISTRY \
-            --username '${{ secrets.ACR_USERNAME }}' \
-            --password '${{ secrets.ACR_PASSWORD }}'
+      # ❌ REMOVED: Configure ACR credentials
+      # Managed Identity + AcrPull handles pull access
 
       - name: Deploy Container App
         run: |
@@ -144,6 +144,6 @@ jobs:
 
       - name: Show app URL
         run: |
-          FQDN=$(az containerapp show -g $RG -n $APP_NAME --query properties.configuration.ingress.fqdn -o tsv)
+          FQDN=$(az containerapp.show -g $RG -n $APP_NAME --query properties.configuration.ingress.fqdn -o tsv)
           echo "Deployed successfully!"
           echo "URL: https://$FQDN"
