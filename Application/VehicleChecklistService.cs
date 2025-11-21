@@ -167,7 +167,7 @@ namespace Application
                     {
                         UpdateHandoverchecklistOrChecklistOutSideAsync(checklist, req.ChecklistItems);
                     }
-                    else if (checklist.Type == (int)VehicleChecklistType.Return)
+                    else if (checklist.Type == (int)VehicleChecklistType.Return && checklist.IsSignedByStaff == false)
                     {
                         var contract = await _uow.RentalContractRepository.GetByChecklistIdAsync(id)
                         ?? throw new NotFoundException(Message.RentalContractMessage.NotFound);
@@ -213,6 +213,7 @@ namespace Application
             IEnumerable<UpdateChecklistItemReq> checklistReq, RentalContract contract,
             DateTimeOffset? maintainUntil)
         {
+            
             if (maintainUntil != null)
             {
                 checklist.MaintainedUntil = maintainUntil;

@@ -53,7 +53,7 @@ jobs:
       - name: Ensure Container Apps Environment exists
         run: |
           az containerapp env show -g $RG -n $ENV_NAME || \
-          az.containerapp.env.create -g $RG -n $ENV_NAME -l $LOCATION
+          az containerapp env create -g $RG -n $ENV_NAME -l $LOCATION
 
       - name: Create Container App if not exists
         run: |
@@ -67,9 +67,6 @@ jobs:
               --ingress external \
               --target-port $PORT
           fi
-
-      # ❌ REMOVED: Configure ACR credentials
-      # Managed Identity + AcrPull handles pull access
 
       - name: Deploy Container App
         run: |
@@ -144,6 +141,6 @@ jobs:
 
       - name: Show app URL
         run: |
-          FQDN=$(az containerapp.show -g $RG -n $APP_NAME --query properties.configuration.ingress.fqdn -o tsv)
+          FQDN=$(az containerapp show -g $RG -n $APP_NAME --query properties.configuration.ingress.fqdn -o tsv)
           echo "Deployed successfully!"
           echo "URL: https://$FQDN"
