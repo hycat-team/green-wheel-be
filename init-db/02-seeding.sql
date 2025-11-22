@@ -739,7 +739,7 @@ VALUES
  2,1,1,@vVF6,@u5,@staff,@sA,'2025-11-01T00:00:00+07:00'),
 (@cC2,'Active VF6 U6',
  '2025-12-01T00:00:00+07:00','2025-12-03T00:00:00+07:00',
- 2,1,1,@vVF6,@u6,@staff,@sA,'2025-11-15T00:00:00+07:00');
+ 2,1,1,@vVF6,@u6,@staff,@sA,null);
 
 EXEC dbo.__seed_create_invoices @cC1,1,1;
 EXEC dbo.__seed_create_invoices @cC2,1,1;
@@ -760,7 +760,7 @@ VALUES
  2,1,1,@vVF8,@u7,@staff,@sA,'2025-11-01T00:00:00+07:00'),
 (@cD2,'Active VF8 U8',
  '2025-12-01T00:00:00+07:00','2025-12-03T00:00:00+07:00',
- 2,1,1,@vVF8,@u8,@staff,@sA,'2025-11-15T00:00:00+07:00');
+ 2,1,1,@vVF8,@u8,@staff,@sA,null);
 
 EXEC dbo.__seed_create_invoices @cD1,1,1;
 EXEC dbo.__seed_create_invoices @cD2,1,1;
